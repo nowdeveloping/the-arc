@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dylan Barnes — Coaching Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface2: #eef0f4;
+  --border: #dce0e8;
+  --text: #1a1d24;
+  --text-dim: #6b7280;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --accent-glow: rgba(37, 99, 235, 0.06);
+  --win: #16a34a;
+  --win-dim: rgba(22, 163, 74, 0.1);
+  --loss: #dc2626;
+  --loss-dim: rgba(220, 38, 38, 0.08);
+  --gold: #ca8a04;
+  --gold-dim: rgba(202, 138, 4, 0.1);
+  --vball: #eab308;
+  --vball-dim: rgba(234, 179, 8, 0.1);
+  --bball: #2563eb;
+  --bball-dim: rgba(37, 99, 235, 0.08);
+  --futsal: #16a34a;
+  --futsal-dim: rgba(22, 163, 74, 0.08);
+  --hc: #2563eb;
+  --hc-dim: rgba(37, 99, 235, 0.08);
+  --ac: #6b7280;
+  --ac-dim: rgba(107, 114, 128, 0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+  padding: 40px 48px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -60px;
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.coach-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text);
+}
+.header-meta {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.header-meta .dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.career-badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.career-badge {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 22px;
+  text-align: center;
+  min-width: 148px;
+}
+.career-badge.primary {
+  background: var(--accent-light);
+  border-color: #93bbfd;
+}
+.career-badge .record {
+  font-family: 'Instrument Serif', serif;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--text);
+}
+.career-badge .pct {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.career-badge .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-top: 5px;
+}
+
+/* ===== NAV ===== */
+.nav {
+  display: flex;
+  gap: 4px;
+  padding: 14px 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  overflow-x: auto;
+}
+.nav-btn {
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-btn:hover { color: var(--text); background: var(--surface2); }
+.nav-btn.active {
+  color: var(--accent);
+  background: var(--accent-light);
+  border-color: #93bbfd;
+  font-weight: 700;
+}
+
+/* ===== MAIN ===== */
+.main { padding: 32px 48px 64px; }
+.section { display: none; }
+.section.active { display: block; }
+
+.section-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.section-subtitle {
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px;
+  margin-bottom: 6px;
+  margin-top: 36px;
+  color: var(--text);
+}
+.section-desc {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+}
+
+/* ===== STAT CARDS ===== */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 36px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card.volleyball::after { background: var(--vball); }
+.stat-card.basketball::after { background: var(--bball); }
+.stat-card.futsal::after { background: var(--futsal); }
+.stat-card.highlight::after { background: var(--gold); }
+.stat-card.hc::after { background: var(--hc); }
+.stat-card.ac::after { background: var(--ac); }
+.stat-card .stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.stat-card .stat-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-card .stat-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* ===== SPORT RECORDS ===== */
+.sport-records {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 36px;
+}
+.sport-record-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+}
+.sport-name {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+.sport-name.vb { color: var(--vball); }
+.sport-name.bb { color: var(--bball); }
+.sport-name.fs { color: var(--futsal); }
+.win-bar-container {
+  height: 30px;
+  background: var(--loss-dim);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.win-bar {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  transition: width 1s ease;
+}
+.win-bar.vb { background: var(--vball); }
+.win-bar.bb { background: var(--bball); }
+.win-bar.fs { background: var(--futsal); }
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ===== TABLES ===== */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 36px;
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  background: var(--surface2);
+}
+td {
+  padding: 11px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.record-w { color: var(--win); font-weight: 700; }
+.record-l { color: var(--loss); font-weight: 700; }
+.sport-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.sport-dot.vb { background: var(--vball); }
+.sport-dot.bb { background: var(--bball); }
+.sport-dot.fs { background: var(--futsal); }
+.pct-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.pct-high { background: var(--win-dim); color: var(--win); }
+.pct-mid { background: var(--gold-dim); color: var(--gold); }
+.pct-low { background: var(--loss-dim); color: var(--loss); }
+.margin-pos { color: var(--win); font-weight: 600; }
+.margin-neg { color: var(--loss); font-weight: 600; }
+.role-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.role-hc { background: var(--hc-dim); color: var(--hc); }
+.role-ac { background: var(--ac-dim); color: var(--ac); }
+.school-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: var(--surface2);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+/* ===== TIMELINE ===== */
+.timeline {
+  display: flex;
+  gap: 0;
+  margin-bottom: 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.timeline-year {
+  flex: 1;
+  padding: 16px 12px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+  min-width: 110px;
+}
+.timeline-year:last-child { border-right: none; }
+.timeline-year .year-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.timeline-year .year-record {
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+.timeline-year .year-pct { font-size: 12px; font-weight: 700; }
+.timeline-sport-tag {
+  display: inline-block;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 2px 1px;
+  font-weight: 600;
+}
+.tag-vb { background: var(--vball-dim); color: var(--vball); }
+.tag-bb { background: var(--bball-dim); color: var(--bball); }
+.tag-fs { background: var(--futsal-dim); color: var(--futsal); }
+
+/* ===== TRAJECTORY CARDS ===== */
+.trajectory-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.trajectory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.trajectory-name { font-size: 16px; font-weight: 700; }
+.trajectory-overall { font-size: 13px; color: var(--text-dim); }
+.spark-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 80px;
+  padding-bottom: 20px;
+  position: relative;
+}
+.spark-row::after {
+  content: '';
+  position: absolute;
+  bottom: 18px;
+  left: 0; right: 0;
+  height: 1px;
+  background: var(--border);
+}
+.spark-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  z-index: 1;
+}
+.spark-bar {
+  width: 100%;
+  max-width: 48px;
+  border-radius: 4px 4px 0 0;
+  transition: height 1s ease;
+}
+.spark-label { font-size: 10px; color: var(--text-dim); position: absolute; bottom: -18px; }
+.spark-pct { font-size: 11px; font-weight: 700; position: absolute; top: -16px; }
+
+/* ===== TIER CARDS ===== */
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 36px;
+}
+.tier-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+.tier-card .tier-name {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.tier-card .tier-record {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+.tier-card .tier-pct { font-size: 14px; font-weight: 700; }
+
+/* ===== BAR CHARTS ===== */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+}
+.bar-label { font-size: 13px; color: var(--text-dim); text-align: right; }
+.bar-track {
+  height: 24px;
+  background: var(--surface2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1.2s ease;
+  min-width: 2px;
+}
+.bar-fill.win { background: var(--win); }
+.bar-fill.vb { background: var(--vball); }
+.bar-fill.bb { background: var(--bball); }
+.bar-fill.fs { background: var(--futsal); }
+.bar-value { font-size: 13px; font-weight: 700; }
+
+.chart-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+/* ===== LEGEND ===== */
+.legend {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ===== FILTERS ===== */
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.filter-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.filter-select {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 120px;
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+th.sortable:hover { color: var(--accent); }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .header { padding: 24px; }
+  .nav { padding: 12px 24px; }
+  .main { padding: 24px; }
+  .header-top { flex-direction: column; }
+  .coach-name { font-size: 32px; }
+  .timeline { flex-wrap: wrap; }
+  .bar-row { grid-template-columns: 100px 1fr 50px; }
+}
+@media (max-width: 600px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .career-badges { flex-direction: column; }
+  .career-badge { min-width: unset; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="coach-name">Dylan Barnes</div>
+      <div class="header-meta">
+        <span>Coaching Record</span>
+        <span class="dot"></span>
+        <span>7 School Years</span>
+        <span class="dot"></span>
+        <span>15 Coaching Seasons</span>
+        <span class="dot"></span>
+        <span>3 Sports</span>
+        <span class="dot"></span>
+        <span>2019–2026</span>
+      </div>
+    </div>
+    <div class="career-badges" id="careerBadges"></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" data-section="overview">Career Overview</button>
+  <button class="nav-btn" data-section="trajectory">Year-over-Year</button>
+  <button class="nav-btn" data-section="programs">Programs</button>
+  <button class="nav-btn" data-section="competition">Competition Level</button>
+  <button class="nav-btn" data-section="deepdive">Sport Deep Dives</button>
+  <button class="nav-btn" data-section="opponents">Opponents & Rivals</button>
+</nav>
+
+<div class="main">
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="section active" id="sec-overview">
+    <div class="section-title animate-in">At a Glance</div>
+    <div class="section-desc animate-in delay-1">Career totals across all sports, levels, and competitions.</div>
+    <div class="stat-grid animate-in delay-2" id="statGrid"></div>
+
+    <div class="legend animate-in delay-2">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--hc)"></div> Head Coach</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--ac)"></div> Assistant Coach</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--vball)"></div> Volleyball</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--bball)"></div> Basketball</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--futsal)"></div> Futsal</div>
+    </div>
+
+    <div class="sport-records animate-in delay-3" id="sportRecords"></div>
+
+    <div class="section-subtitle" style="margin-top:12px;">Championships & Hardware</div>
+    <div class="section-desc">Tournament and league finishes across all programs.</div>
+    <div class="stat-grid animate-in delay-3" id="hardwareGrid"></div>
+    <div id="championshipList" class="animate-in delay-4" style="margin-top:16px;"></div>
+
+    <div class="section-subtitle" style="margin-top:12px;">Every Season</div>
+    <div class="section-desc">Complete season-by-season breakdown. Click column headers to sort. Use filters to narrow down.</div>
+
+    <div class="filter-bar animate-in delay-3">
+      <div class="filter-group">
+        <label class="filter-label">Sport</label>
+        <select id="filterSport" class="filter-select"><option value="">All</option><option value="BASKETBALL">Basketball</option><option value="VOLLEYBALL">Volleyball</option><option value="FUTSAL">Futsal</option></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Role</label>
+        <select id="filterRole" class="filter-select"><option value="">All</option><option value="HC">Head Coach</option><option value="AC">Asst. Coach</option></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Season</label>
+        <select id="filterSeason" class="filter-select"><option value="">All</option><option value="Fall">Fall</option><option value="Winter">Winter</option><option value="Spring">Spring</option></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Gender</label>
+        <select id="filterGender" class="filter-select"><option value="">All</option><option value="Boys">Boys</option><option value="Girls">Girls</option></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Level</label>
+        <select id="filterLevel" class="filter-select"><option value="">All</option><option value="HS">HS</option><option value="MS">MS</option></select>
+      </div>
+    </div>
+
+    <div class="table-wrap animate-in delay-4" style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="sy">Year ▾</th>
+            <th class="sortable" data-sort="season">Season</th>
+            <th>School</th>
+            <th class="sortable" data-sort="sport">Sport</th>
+            <th>Program</th>
+            <th>Level</th>
+            <th>Role</th>
+            <th class="sortable" data-sort="pct">Win %</th>
+            <th>Record</th>
+            <th class="sortable" data-sort="avg_margin">Avg Margin</th>
+            <th class="sortable" data-sort="total_diff">Total +/−</th>
+            <th class="sortable" data-sort="games">Games</th>
+            <th>Placements</th>
+          </tr>
+        </thead>
+        <tbody id="seasonTable"></tbody>
+      <tfoot id="seasonTotals"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TRAJECTORY ===== -->
+  <div class="section" id="sec-trajectory">
+    <div class="section-title animate-in">Year-over-Year Trajectory</div>
+    <div class="section-desc animate-in delay-1">How each program has trended across seasons — the story of program building.</div>
+
+    <div class="section-subtitle" style="margin-top:8px;">Combined Record by School Year</div>
+    <div class="section-desc">All programs, all roles.</div>
+    <div class="timeline animate-in delay-2" id="yearTimeline" style="overflow-x:auto;"></div>
+
+    <div class="section-subtitle">Head Coach Program Trajectories</div>
+    <div class="section-desc">Win percentage and average margin trends for programs you led.</div>
+    <div id="trajectoryCards"></div>
+  </div>
+
+  <!-- ===== PROGRAMS ===== -->
+  <div class="section" id="sec-programs">
+    <div class="section-title animate-in">Programs Coached</div>
+    <div class="section-desc animate-in delay-1">Every program led or supported — showing breadth and versatility.</div>
+
+    <div class="section-subtitle" style="margin-top:8px;">Coaching Timeline</div>
+    <div class="section-desc">Which teams you coached each school year, with role and school indicated.</div>
+    <div id="programTimeline" class="animate-in delay-2" style="overflow-x:auto;"></div>
+
+    <div class="section-subtitle">Program Totals</div>
+    <div class="section-desc">Lifetime record per program.</div>
+    <div id="programTotals" class="animate-in delay-3"></div>
+  </div>
+
+  <!-- ===== COMPETITION ===== -->
+  <div class="section" id="sec-competition">
+    <div class="section-title animate-in">Performance by Competition Level</div>
+    <div class="section-desc animate-in delay-1">How your teams perform at different stages — from rival series to nationals.</div>
+    <div class="tier-grid animate-in delay-2" id="tierGrid"></div>
+    <div class="chart-container animate-in delay-3">
+      <div class="chart-title">Win Rate by Competition Tier</div>
+      <div class="bar-chart" id="tierBars"></div>
+    </div>
+  </div>
+
+  <!-- ===== SPORT DEEP DIVES ===== -->
+  <div class="section" id="sec-deepdive">
+    <div class="section-title animate-in">Sport Deep Dives</div>
+    <div class="section-desc animate-in delay-1">In-depth analysis for each sport — select a sport to explore.</div>
+
+    <div class="filter-bar animate-in delay-1" style="margin-bottom:24px">
+      <div class="filter-group">
+        <label class="filter-label">Sport</label>
+        <select id="ddSport" class="filter-select">
+          <option value="BASKETBALL">Basketball</option>
+          <option value="VOLLEYBALL">Volleyball</option>
+          <option value="FUTSAL">Futsal</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Role</label>
+        <select id="ddRole" class="filter-select">
+          <option value="ALL">All</option>
+          <option value="HC">Head Coach Only</option>
+          <option value="AC">Asst. Coach Only</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="deepDiveContent" class="animate-in delay-2"></div>
+  </div>
+
+  <!-- ===== OPPONENTS ===== -->
+  <div class="section" id="sec-opponents">
+    <div class="section-title animate-in">Opponents & Rivals</div>
+    <div class="section-desc animate-in delay-1">Head-to-head records against every school, across all sports. Click a school to expand team-level and sport breakdowns.</div>
+
+    <div class="section-subtitle" style="margin-top:8px;">ISB — Crosstown Rival</div>
+    <div class="section-desc">Battle of Busan series and all-time record.</div>
+    <div id="rivalSpotlight" class="animate-in delay-2"></div>
+
+    <div class="section-subtitle">All Opponents</div>
+    <div class="section-desc">Grouped by school. Click to expand breakdowns.</div>
+    <div id="opponentList" class="animate-in delay-3"></div>
+  </div>
+
+</div>
+
+<script>
+/*
+ * Dylan Barnes — Coaching Dashboard
+ * Single-file HTML dashboard. All data is embedded as JSON constants below.
+ *
+ * === HOW TO UPDATE ===
+ * 1. DATA        — Season-level aggregates (wins, losses, margins per team/year)
+ * 2. PLACEMENTS  — Tournament finish placements per team/year
+ * 3. GAMELOG      — Individual game results per team/year
+ * 4. VB_STATS     — Volleyball set-level analysis (ALL/HC/AC splits)
+ * 5. BB_STATS     — Basketball scoring analysis (ALL/HC/AC splits)
+ * 6. FS_STATS     — Futsal scoring analysis
+ * 7. DEEP_STATS   — Cross-sport insights (venue, home/away, day 1/2, etc.)
+ * 8. OPP_DATA     — Opponent records grouped by base school
+ *
+ * === FUTURE: TEAM PHOTOS ===
+ * To add team photos, create an /images folder alongside this file.
+ * Name photos like: 2022-23_HGB-V.jpg, 2024-25_HBV-V.jpg, etc.
+ * Then add an <img> tag in the season table row or trajectory card.
+ *
+ * === FUTURE: PROFILE PICTURE ===
+ * Add to the .header section: <img src="images/profile.jpg" class="profile-pic">
+ * Style with: .profile-pic { width:80px; height:80px; border-radius:50%; }
+ *
+ * === ROLE LOGIC ===
+ * AC (Assistant Coach) for:
+ *   - 2019-20 HS Girls Volleyball Varsity (under Simon Lee)
+ *   - 2019-20, 2021-22, 2022-23 HS Girls Basketball Varsity (under Pat Galles)
+ * Everything else = HC (Head Coach)
+ */
+
+// ====== DATA ======
+const DATA = {"career":{"wins":151,"losses":101,"games":252},"by_sport":{"VOLLEYBALL":{"wins":62,"losses":60},"BASKETBALL":{"wins":83,"losses":39},"FUTSAL":{"wins":6,"losses":2}},"seasons":[{"sy":"2019-20","sport":"BASKETBALL","school":"HS","gender":"Girls","level":"JV","w":3,"l":2,"pct":60,"avg_margin":-1.4,"total_diff":-7,"games":5},{"sy":"2019-20","sport":"BASKETBALL","school":"HS","gender":"Girls","level":"Varsity","w":4,"l":4,"pct":50,"avg_margin":-2.6,"total_diff":-21,"games":8},{"sy":"2019-20","sport":"VOLLEYBALL","school":"HS","gender":"Girls","level":"JV","w":7,"l":2,"pct":78,"avg_margin":6.9,"total_diff":62,"games":9},{"sy":"2019-20","sport":"VOLLEYBALL","school":"HS","gender":"Girls","level":"Varsity","w":6,"l":9,"pct":40,"avg_margin":1.5,"total_diff":23,"games":15},{"sy":"2020-21","sport":"VOLLEYBALL","school":"HS","gender":"Girls","level":"JV","w":1,"l":0,"pct":100,"avg_margin":25.0,"total_diff":25,"games":1},{"sy":"2021-22","sport":"BASKETBALL","school":"HS","gender":"Girls","level":"JV","w":5,"l":0,"pct":100,"avg_margin":14.6,"total_diff":73,"games":5},{"sy":"2021-22","sport":"BASKETBALL","school":"HS","gender":"Girls","level":"Varsity","w":8,"l":0,"pct":100,"avg_margin":20.1,"total_diff":161,"games":8},{"sy":"2021-22","sport":"BASKETBALL","school":"MS","gender":"Girls","level":"A-Team","w":8,"l":0,"pct":100,"avg_margin":19.9,"total_diff":159,"games":8},{"sy":"2021-22","sport":"BASKETBALL","school":"MS","gender":"Girls","level":"B-Team","w":5,"l":0,"pct":100,"avg_margin":14.6,"total_diff":73,"games":5},{"sy":"2021-22","sport":"FUTSAL","school":"HS","gender":"Girls","level":"Varsity","w":6,"l":2,"pct":75,"avg_margin":0.0,"total_diff":0,"games":8},{"sy":"2021-22","sport":"VOLLEYBALL","school":"HS","gender":"Boys","level":"JV","w":4,"l":2,"pct":67,"avg_margin":4.7,"total_diff":28,"games":6},{"sy":"2021-22","sport":"VOLLEYBALL","school":"HS","gender":"Boys","level":"Varsity","w":5,"l":3,"pct":62,"avg_margin":7.9,"total_diff":63,"games":8},{"sy":"2022-23","sport":"BASKETBALL","school":"HS","gender":"Girls","level":"JV","w":5,"l":2,"pct":71,"avg_margin":8.1,"total_diff":57,"games":7},{"sy":"2022-23","sport":"BASKETBALL","school":"HS","gender":"Girls","level":"Varsity","w":6,"l":0,"pct":100,"avg_margin":15.7,"total_diff":94,"games":6},{"sy":"2022-23","sport":"BASKETBALL","school":"MS","gender":"Girls","level":"A-Team","w":10,"l":0,"pct":100,"avg_margin":22.0,"total_diff":220,"games":10},{"sy":"2022-23","sport":"BASKETBALL","school":"MS","gender":"Girls","level":"B-Team","w":7,"l":1,"pct":88,"avg_margin":7.1,"total_diff":57,"games":8},{"sy":"2022-23","sport":"BASKETBALL","school":"MS","gender":"Girls","level":"C-Team","w":2,"l":0,"pct":100,"avg_margin":6.5,"total_diff":13,"games":2},{"sy":"2022-23","sport":"VOLLEYBALL","school":"HS","gender":"Boys","level":"JV","w":10,"l":2,"pct":83,"avg_margin":9.8,"total_diff":118,"games":12},{"sy":"2022-23","sport":"VOLLEYBALL","school":"HS","gender":"Boys","level":"Varsity","w":11,"l":8,"pct":58,"avg_margin":4.5,"total_diff":85,"games":19},{"sy":"2023-24","sport":"BASKETBALL","school":"HS","gender":"Boys","level":"Varsity","w":1,"l":12,"pct":8,"avg_margin":-16.3,"total_diff":-212,"games":13},{"sy":"2023-24","sport":"BASKETBALL","school":"MS","gender":"Boys","level":"A-Team","w":5,"l":7,"pct":42,"avg_margin":-8.2,"total_diff":-98,"games":12},{"sy":"2023-24","sport":"BASKETBALL","school":"MS","gender":"Boys","level":"B-Team","w":6,"l":6,"pct":50,"avg_margin":-2.5,"total_diff":-30,"games":12},{"sy":"2023-24","sport":"VOLLEYBALL","school":"HS","gender":"Boys","level":"Varsity","w":6,"l":13,"pct":32,"avg_margin":-8.4,"total_diff":-159,"games":19},{"sy":"2024-25","sport":"BASKETBALL","school":"MS","gender":"Boys","level":"A-Team","w":7,"l":3,"pct":70,"avg_margin":7.3,"total_diff":73,"games":10},{"sy":"2024-25","sport":"BASKETBALL","school":"MS","gender":"Boys","level":"B-Team","w":1,"l":2,"pct":33,"avg_margin":-3.3,"total_diff":-10,"games":3},{"sy":"2024-25","sport":"VOLLEYBALL","school":"HS","gender":"Boys","level":"Varsity","w":10,"l":12,"pct":45,"avg_margin":-1.7,"total_diff":-37,"games":22},{"sy":"2025-26","sport":"VOLLEYBALL","school":"HS","gender":"Boys","level":"Varsity","w":2,"l":9,"pct":18,"avg_margin":-9.6,"total_diff":-106,"games":11}],"by_event_tier":{"SKAC/SKAIS (Regional)":{"w":110,"l":34},"KISAC (National)":{"w":14,"l":43},"BOB (Rival Series)":{"w":11,"l":6},"Invitationals":{"w":16,"l":18}},"by_year":{"2019-20":{"w":20,"l":17},"2020-21":{"w":1,"l":0},"2021-22":{"w":41,"l":7},"2022-23":{"w":51,"l":13},"2023-24":{"w":18,"l":38},"2024-25":{"w":18,"l":17},"2025-26":{"w":2,"l":9}}};
+
+const SCHOOL = 'BFS'; // For future multi-school support
+const SCHOOL_FULL = 'Busan Foreign School';
+
+// ====== ROLE ASSIGNMENT ======
+function getRole(s) {
+  // AC: HS Girls Volleyball Varsity 2019-20 (under Simon Lee)
+  if (s.sport === 'VOLLEYBALL' && s.gender === 'Girls' && s.school === 'HS' && s.sy === '2019-20' && s.level === 'Varsity') return 'AC';
+  // AC: HS Girls Basketball Varsity (under Pat Galles: 2019-20, 2021-22, 2022-23)
+  if (s.sport === 'BASKETBALL' && s.gender === 'Girls' && s.school === 'HS' && s.level === 'Varsity' && ['2019-20','2021-22','2022-23'].includes(s.sy)) return 'AC';
+  return 'HC';
+}
+
+function getSeasonFromRow(s) {
+  if (s.sport === 'VOLLEYBALL') return 'Fall';
+  if (s.sport === 'FUTSAL') return 'Spring';
+  if (s.sport === 'BASKETBALL') return s.school === 'MS' ? 'Spring' : 'Winter';
+  return '';
+}
+
+const PLACEMENTS = {"2019-20|BASKETBALL|HS|Girls|JV":[{"comp":"SKAC","place":1,"of":6}],"2019-20|BASKETBALL|HS|Girls|Varsity":[{"comp":"SKAC","place":2,"of":6}],"2022-23|BASKETBALL|HS|Girls|JV":[{"comp":"SKAC","place":1,"of":5}],"2022-23|BASKETBALL|HS|Girls|Varsity":[{"comp":"SKAC","place":1,"of":5}],"2023-24|BASKETBALL|HS|Boys|Varsity":[{"comp":"BOB","place":2,"of":2},{"comp":"BINV","place":2,"of":3},{"comp":"KISAC","place":7,"of":7},{"comp":"SKAC","place":4,"of":4}],"2021-22|FUTSAL|HS|Girls|Varsity":[{"comp":"SKAC","place":1,"of":4},{"comp":"BUSAN7","place":2,"of":4}],"2019-20|VOLLEYBALL|HS|Girls|JV":[{"comp":"SKAC","place":1,"of":6}],"2019-20|VOLLEYBALL|HS|Girls|Varsity":[{"comp":"SKAC","place":2,"of":6},{"comp":"KISAC","place":6,"of":6}],"2021-22|VOLLEYBALL|HS|Boys|JV":[{"comp":"TRIANGLE","place":2,"of":3},{"comp":"SKAC","place":1,"of":6}],"2021-22|VOLLEYBALL|HS|Boys|Varsity":[{"comp":"TRIANGLE","place":2,"of":3},{"comp":"SKAC","place":2,"of":6}],"2022-23|VOLLEYBALL|HS|Boys|Varsity":[{"comp":"BOB","place":1,"of":2},{"comp":"KISAC","place":4,"of":6},{"comp":"SKAC","place":2,"of":4}],"2022-23|VOLLEYBALL|HS|Boys|JV":[{"comp":"KISAC","place":6,"of":6},{"comp":"SKAC","place":4,"of":4}],"2023-24|VOLLEYBALL|HS|Boys|Varsity":[{"comp":"BOB","place":2,"of":2},{"comp":"SKAC","place":4,"of":8},{"comp":"BINV","place":3,"of":5},{"comp":"KISAC","place":6,"of":6}],"2024-25|VOLLEYBALL|HS|Boys|Varsity":[{"comp":"JIT","place":7,"of":8},{"comp":"BINV","place":2,"of":4},{"comp":"BOB","place":1,"of":2},{"comp":"SKAIS","place":2,"of":4},{"comp":"KISAC","place":5,"of":6}],"2025-26|VOLLEYBALL|HS|Boys|Varsity":[{"comp":"BOB","place":2,"of":2},{"comp":"KISAC","place":6,"of":6},{"comp":"SKAIS","place":3,"of":4}],"2021-22|BASKETBALL|MS|Girls|A-Team":[{"comp":"SKAC","place":1,"of":4}],"2021-22|BASKETBALL|MS|Girls|B-Team":[{"comp":"SKAC","place":1,"of":3}],"2022-23|BASKETBALL|MS|Girls|A-Team":[{"comp":"SKAC","place":1,"of":6}],"2022-23|BASKETBALL|MS|Girls|B-Team":[{"comp":"SKAC","place":1,"of":5}],"2023-24|BASKETBALL|MS|Boys|A-Team":[{"comp":"BOB","place":1,"of":2},{"comp":"KISAC","place":6,"of":6},{"comp":"SKAC","place":2,"of":6}],"2023-24|BASKETBALL|MS|Boys|B-Team":[{"comp":"KISAC","place":6,"of":6},{"comp":"SKAC","place":1,"of":5}],"2024-25|BASKETBALL|MS|Boys|A-Team":[{"comp":"BOB","place":1,"of":2},{"comp":"KISAC","place":4,"of":7},{"comp":"SKAIS","place":2,"of":4}],"2024-25|BASKETBALL|MS|Boys|B-Team":[{"comp":"SKAIS","place":3,"of":4}]};
+
+function getPlacementsFor(s) {
+  const key = `${s.sy}|${s.sport}|${s.school}|${s.gender}|${s.level}`;
+  return PLACEMENTS[key] || [];
+}
+
+const GAMELOG = {"2021-22|BASKETBALL|MS|Girls|A-Team":[{"d":"2022/04/30","e":"SKAC DIV","l":"HIS","o":"DIS","r":"W","df":15,"s":"21-6"},{"d":"2022/04/30","e":"SKAC DIV","l":"HIS","o":"HIS","r":"W","df":27,"s":"30-3"},{"d":"2022/04/30","e":"SKAC DIV","l":"HIS","o":"ISB","r":"W","df":18,"s":"31-13"},{"d":"2022/05/13","e":"SKAC FIN","l":"BFS","o":"ISB","r":"W","df":10,"s":"14-4"},{"d":"2022/05/13","e":"SKAC FIN","l":"BFS","o":"HIS","r":"W","df":21,"s":"26-5"},{"d":"2022/05/13","e":"SKAC FIN","l":"BFS","o":"DIS","r":"W","df":20,"s":"30-10"},{"d":"2022/05/13","e":"SKAC FIN","l":"BFS","o":"HIS","r":"W","df":35,"s":"44-9"},{"d":"2022/05/13","e":"SKAC FIN","l":"BFS","o":"ISB","r":"W","df":13,"s":"27-14"}],"2021-22|BASKETBALL|MS|Girls|B-Team":[{"d":"2022/04/30","e":"SKAC DIV","l":"HIS","o":"DIS-3","r":"W","df":25,"s":"35-10"},{"d":"2022/04/30","e":"SKAC DIV","l":"HIS","o":"DIS-2","r":"W","df":16,"s":"37-21"},{"d":"2022/04/30","e":"SKAC DIV","l":"HIS","o":"HIS-2","r":"W","df":4,"s":"19-15"},{"d":"2022/05/13","e":"SKAC FIN","l":"BFS","o":"DIS-2","r":"W","df":13,"s":"20-7"},{"d":"2022/05/13","e":"SKAC FIN","l":"BFS","o":"HIS-2","r":"W","df":15,"s":"21-6"}],"2021-22|BASKETBALL|HS|Girls|Varsity":[{"d":"2022/02/19","e":"SKAC FIN","l":"BFS","o":"ISB","r":"W","df":10,"s":"14-4"},{"d":"2022/02/19","e":"SKAC FIN","l":"BFS","o":"HIS","r":"W","df":21,"s":"26-5"},{"d":"2022/02/19","e":"SKAC FIN","l":"BFS","o":"DIS","r":"W","df":22,"s":"32-10"},{"d":"2022/02/19","e":"SKAC FIN","l":"BFS","o":"HIS","r":"W","df":35,"s":"44-9"},{"d":"2022/02/19","e":"SKAC FIN","l":"BFS","o":"ISB","r":"W","df":13,"s":"27-14"},{"d":"2022/1/22","e":"SKAC DIV","l":"GIFS","o":"DIS","r":"W","df":15,"s":"21-6"},{"d":"2022/1/22","e":"SKAC DIV","l":"GIFS","o":"HIS","r":"W","df":27,"s":"30-3"},{"d":"2022/1/22","e":"SKAC DIV","l":"GIFS","o":"ISB","r":"W","df":18,"s":"31-13"}],"2021-22|BASKETBALL|HS|Girls|JV":[{"d":"2022/02/19","e":"SKAC FIN","l":"BFS","o":"DIS-2","r":"W","df":13,"s":"20-7"},{"d":"2022/02/19","e":"SKAC FIN","l":"BFS","o":"HIS-2","r":"W","df":15,"s":"21-6"},{"d":"2022/1/22","e":"SKAC DIV","l":"GIFS","o":"DIS-3","r":"W","df":25,"s":"35-10"},{"d":"2022/1/22","e":"SKAC DIV","l":"GIFS","o":"DIS-2","r":"W","df":16,"s":"37-21"},{"d":"2022/1/22","e":"SKAC DIV","l":"GIFS","o":"HIS-2","r":"W","df":4,"s":"19-15"}],"2022-23|BASKETBALL|MS|Girls|A-Team":[{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"DIS","r":"W","df":37,"s":"44-7"},{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"HIS","r":"W","df":26,"s":"36-10"},{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"DIS","r":"W","df":5,"s":"18-13"},{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"HIS","r":"W","df":27,"s":"34-7"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"HIS","r":"W","df":27,"s":"34-7"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"FPS","r":"W","df":25,"s":"28-3"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"ISB","r":"W","df":4,"s":"20-16"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"DIS","r":"W","df":14,"s":"25-11"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"FPS","r":"W","df":37,"s":"44-7"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"DIS","r":"W","df":18,"s":"37-19"}],"2022-23|BASKETBALL|MS|Girls|B-Team":[{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"DIS-2","r":"W","df":9,"s":"19-10"},{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"HIS-2","r":"W","df":18,"s":"23-5"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"HIS-2","r":"W","df":4,"s":"10-6"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"DIS-2","r":"L","df":-2,"s":"7-9"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"ISB","r":"W","df":6,"s":"13-7"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"BIA","r":"W","df":5,"s":"15-10"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"HIS-2","r":"W","df":11,"s":"18-7"},{"d":"2023/05/19","e":"SKAC FIN","l":"ISB","o":"DIS-2","r":"W","df":6,"s":"12-6"}],"2022-23|BASKETBALL|MS|Girls|C-Team":[{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"HIS-2","r":"W","df":9,"s":"25-16"},{"d":"2023/04/15","e":"SKAC DIV","l":"HIS","o":"DIS-2","r":"W","df":4,"s":"9-5"}],"2022-23|BASKETBALL|HS|Girls|Varsity":[{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"DIS","r":"W","df":19,"s":"38-19"},{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"FPS-2","r":"W","df":16,"s":"38-22"},{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"ISB","r":"W","df":19,"s":"36-17"},{"d":"2023/03/17","e":"SKAC FIN","l":"BFS","o":"FPS","r":"W","df":19,"s":"39-20"},{"d":"2023/03/17","e":"SKAC FIN","l":"BFS","o":"DIS","r":"W","df":7,"s":"23-16"},{"d":"2023/03/17","e":"SKAC FIN","l":"BFS","o":"ISB","r":"W","df":14,"s":"33-19"}],"2022-23|BASKETBALL|HS|Girls|JV":[{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"GIFS","r":"W","df":12,"s":"25-13"},{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"BIS/AIS","r":"W","df":16,"s":"34-18"},{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"FPS","r":"L","df":-7,"s":"12-19"},{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"ISB","r":"L","df":-13,"s":"18-31"},{"d":"2023/02/04","e":"SKAC DIV","l":"GIFS","o":"FPS-2","r":"W","df":5,"s":"13-8"},{"d":"2023/03/17","e":"SKAC FIN","l":"BFS","o":"FPS-2","r":"W","df":28,"s":"32-4"},{"d":"2023/03/17","e":"SKAC FIN","l":"BFS","o":"FPS-2","r":"W","df":16,"s":"22-6"}],"2023-24|BASKETBALL|HS|Boys|Varsity":[{"d":"2023/12/12","e":"BOB","l":"ISB","o":"ISB","r":"L","df":-33,"s":"24-57"},{"d":"2024/02/16","e":"BINV","l":"BFS","o":"CCAS","r":"L","df":-13,"s":"33-46"},{"d":"2024/02/16","e":"BINV","l":"BFS","o":"CCAS","r":"L","df":-9,"s":"28-37"},{"d":"2024/02/17","e":"BINV","l":"BFS","o":"AIS","r":"W","df":24,"s":"60-36"},{"d":"2024/02/17","e":"BINV","l":"BFS","o":"CCAS","r":"L","df":-24,"s":"20-44"},{"d":"2024/02/23","e":"KISAC","l":"SJA","o":"SJA","r":"L","df":-36,"s":"7-43"},{"d":"2024/02/23","e":"KISAC","l":"SJA","o":"DIS","r":"L","df":-20,"s":"29-49"},{"d":"2024/02/24","e":"KISAC","l":"SJA","o":"FPS","r":"L","df":-3,"s":"47-50"},{"d":"2024/02/24","e":"KISAC","l":"SJA","o":"SJA-2","r":"L","df":-25,"s":"22-47"},{"d":"2024/02/28","e":"SKAC FIN","l":"GIFS","o":"DIS","r":"L","df":-25,"s":"6-31"},{"d":"2024/02/28","e":"SKAC FIN","l":"GIFS","o":"ISB","r":"L","df":-31,"s":"10-41"},{"d":"2024/02/28","e":"SKAC FIN","l":"GIFS","o":"HIS","r":"L","df":-2,"s":"22-24"},{"d":"2024/1/30","e":"BOB","l":"BFS","o":"ISB","r":"L","df":-15,"s":"31-46"}],"2023-24|BASKETBALL|MS|Boys|A-Team":[{"d":"2024/03/19","e":"BOB","l":"ISB","o":"ISB","r":"L","df":-13,"s":"24-37"},{"d":"2024/05/07","e":"BOB","l":"BFS","o":"ISB","r":"W","df":6,"s":"45-39"},{"d":"2024/05/17","e":"KISAC","l":"KISJ","o":"SJA","r":"L","df":-25,"s":"23-48"},{"d":"2024/05/17","e":"KISAC","l":"KISJ","o":"DIS","r":"W","df":3,"s":"23-20"},{"d":"2024/05/17","e":"KISAC","l":"KISJ","o":"NLCS","r":"L","df":-21,"s":"16-37"},{"d":"2024/05/18","e":"KISAC","l":"KISJ","o":"KISJ","r":"L","df":-26,"s":"11-37"},{"d":"2024/05/18","e":"KISAC","l":"KISJ","o":"FPS","r":"L","df":-23,"s":"12-35"},{"d":"2024/05/18","e":"KISAC","l":"KISJ","o":"DIS","r":"L","df":-14,"s":"15-29"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"HIS","r":"W","df":15,"s":"25-10"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"AIS","r":"W","df":2,"s":"31-29"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"ISB","r":"W","df":8,"s":"37-29"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"DIS","r":"L","df":-10,"s":"34-44"}],"2023-24|BASKETBALL|MS|Boys|B-Team":[{"d":"2024/05/17","e":"KISAC","l":"KISJ","o":"KISJ-2","r":"L","df":-25,"s":"4-29"},{"d":"2024/05/17","e":"KISAC","l":"KISJ","o":"DIS-2","r":"W","df":6,"s":"19-13"},{"d":"2024/05/17","e":"KISAC","l":"KISJ","o":"SJA-2","r":"L","df":-13,"s":"19-32"},{"d":"2024/05/18","e":"KISAC","l":"KISJ","o":"NLCS-2","r":"L","df":-21,"s":"12-33"},{"d":"2024/05/18","e":"KISAC","l":"KISJ","o":"BHA","r":"L","df":-12,"s":"12-24"},{"d":"2024/05/18","e":"KISAC","l":"KISJ","o":"DIS-2","r":"L","df":-10,"s":"7-17"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"HIS-2","r":"W","df":24,"s":"26-2"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"ISB-2","r":"W","df":9,"s":"22-13"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"ISB-3","r":"W","df":6,"s":"12-6"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"DIS-2","r":"L","df":-4,"s":"15-19"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"ISB-3","r":"W","df":4,"s":"19-15"},{"d":"2024/05/22","e":"SKAC FIN","l":"ISB","o":"DIS-2","r":"W","df":6,"s":"21-15"}],"2024-25|BASKETBALL|MS|Boys|A-Team":[{"d":"2025/04/15","e":"BOB","l":"BFS","o":"ISB","r":"W","df":15,"s":"43-28"},{"d":"2025/05/06","e":"BOB","l":"ISB","o":"ISB","r":"W","df":9,"s":"26-17"},{"d":"2025/05/16","e":"KISAC","l":"DIS","o":"NLCS","r":"W","df":7,"s":"31-24"},{"d":"2025/05/16","e":"KISAC","l":"DIS","o":"SJA","r":"L","df":-7,"s":"28-35"},{"d":"2025/05/17","e":"KISAC","l":"DIS","o":"DIS","r":"W","df":7,"s":"28-21"},{"d":"2025/05/17","e":"KISAC","l":"DIS","o":"KISJ","r":"W","df":14,"s":"42-28"},{"d":"2025/05/17","e":"KISAC","l":"DIS","o":"SJA","r":"L","df":-6,"s":"36-42"},{"d":"2025/05/22","e":"SKAIS","l":"DIS","o":"DIS","r":"W","df":3,"s":"23-20"},{"d":"2025/05/22","e":"SKAIS","l":"DIS","o":"AIS/GIFS","r":"W","df":34,"s":"37-3"},{"d":"2025/05/22","e":"SKAIS","l":"DIS","o":"ISB","r":"L","df":-3,"s":"22-25"}],"2024-25|BASKETBALL|MS|Boys|B-Team":[{"d":"2025/05/22","e":"SKAIS","l":"DIS","o":"AIS/GIFS-2","r":"W","df":8,"s":"18-10"},{"d":"2025/05/22","e":"SKAIS","l":"DIS","o":"ISB-3","r":"L","df":-7,"s":"5-12"},{"d":"2025/05/22","e":"SKAIS","l":"DIS","o":"ISB-2","r":"L","df":-11,"s":"10-21"}],"2021-22|FUTSAL|HS|Girls|Varsity":[{"d":"2022/04/23","e":"SKAC","l":"ISB","o":"DIS","r":"L","df":0,"s":"1-2"},{"d":"2022/04/23","e":"SKAC","l":"ISB","o":"ISB","r":"W","df":0,"s":"3-0"},{"d":"2022/04/23","e":"SKAC","l":"ISB","o":"ISB-2","r":"W","df":0,"s":"10-1"},{"d":"2022/05/27","e":"BUSAN7","l":"ISB","o":"NLCS","r":"L","df":0,"s":"1-3"},{"d":"2022/05/27","e":"BUSAN7","l":"ISB","o":"SJA","r":"W","df":0,"s":"4-2"},{"d":"2022/05/27","e":"BUSAN7","l":"ISB","o":"ISB","r":"W","df":0,"s":"3-0"},{"d":"2022/05/27","e":"BUSAN7","l":"ISB","o":"ISB","r":"W","df":0,"s":"4-0"},{"d":"2022/05/27","e":"BUSAN7","l":"ISB","o":"NLCS","r":"W","df":0,"s":"4-3"}],"2019-20|VOLLEYBALL|HS|Girls|Varsity":[{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"DIS","r":"L","df":-2,"s":"25-17 / 17-25 / 14-16"},{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"KFS","r":"W","df":26,"s":"25-17 / 25-7"},{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"DIS-2","r":"W","df":9,"s":"25-19 / 25-22"},{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"BFS-2","r":"W","df":33,"s":"25-10 / 25-7"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"ISB","r":"L","df":-18,"s":"9-25 / 26-28"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"HIS","r":"W","df":19,"s":"23-25 / 25-8 / 15-11"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"ISK/BIA","r":"W","df":25,"s":"25-12 / 25-13"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"DIS","r":"W","df":12,"s":"25-11 / 19-25 / 15-11"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"ISB","r":"L","df":-8,"s":"20-25 / 22-25"},{"d":"2019/11/15","e":"KISAC","l":"KISJ","o":"KISJ-2","r":"L","df":-15,"s":"20-25 / 15-25"},{"d":"2019/11/15","e":"KISAC","l":"SJA","o":"BIS","r":"L","df":-6,"s":"19-25 / 25-23 / 16-18"},{"d":"2019/11/15","e":"KISAC","l":"SJA","o":"BHA","r":"L","df":-14,"s":"15-25 / 21-25"},{"d":"2019/11/15","e":"KISAC","l":"KISJ","o":"KISJ","r":"L","df":-15,"s":"20-25 / 15-25"},{"d":"2019/11/16","e":"KISAC","l":"KISJ","o":"ISB","r":"L","df":-19,"s":"13-25 / 18-25"},{"d":"2019/11/16","e":"KISAC","l":"KISJ","o":"BHA","r":"L","df":-4,"s":"23-25 / 23-25"}],"2019-20|VOLLEYBALL|HS|Girls|JV":[{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"GIFS","r":"W","df":14,"s":"25-17 / 25-19"},{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"DIS-2","r":"W","df":22,"s":"25-16 / 25-12"},{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"DIS","r":"L","df":-3,"s":"25-22 / 23-25 / 11-15"},{"d":"2019/09/21","e":"SKAC DIV","l":"DIS","o":"BFS","r":"L","df":-33,"s":"10-25 / 7-25"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"ISB-2","r":"W","df":-3,"s":"25-22 / 14-25 / 15-10"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"HIS-2","r":"W","df":24,"s":"25-21 / 25-5"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"GPA","r":"W","df":13,"s":"24-26 / 25-16 / 15-9"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"KFS","r":"W","df":18,"s":"25-27 / 25-13 / 15-7"},{"d":"2019/10/24","e":"SKAC FIN","l":"ISB","o":"ISB-2","r":"W","df":10,"s":"25-18 / 21-25 / 15-8"}],"2020-21|VOLLEYBALL|HS|Girls|JV":[{"d":"2020/11/20","e":"BOB","l":"ISB","o":"ISB-2","r":"W","df":25,"s":"25-11 / 25-16 / 26-24"}],"2021-22|VOLLEYBALL|HS|Boys|Varsity":[{"d":"2021/10/09","e":"BOB","l":"ISB","o":"ISB","r":"W","df":7,"s":"25-10 / 15-25 / 25-20 / 25-20 / 17-25"},{"d":"2021/10/23","e":"TRIANGLE","l":"BFS","o":"ISB","r":"W","df":33,"s":"25-14 / 25-14 / 25-14"},{"d":"2021/10/23","e":"TRIANGLE","l":"BFS","o":"TCIS","r":"L","df":-28,"s":"25-19 / 14-25 / 14-25 / 13-25"},{"d":"2021/10/23","e":"TRIANGLE","l":"BFS","o":"TCIS","r":"L","df":-11,"s":"19-25 / 20-25"},{"d":"2021/11/20","e":"SKAC FIN","l":"ISB","o":"HIS","r":"W","df":5,"s":"26-25 / 28-26 / 2-0"},{"d":"2021/11/20","e":"SKAC FIN","l":"ISB","o":"KFS","r":"W","df":22,"s":"25-12 / 25-16"},{"d":"2021/11/20","e":"SKAC FIN","l":"ISB","o":"ISB","r":"W","df":25,"s":"25-11 / 25-14"},{"d":"2021/11/20","e":"SKAC FIN","l":"ISB","o":"HIS","r":"L","df":10,"s":"25-9 / 26-28 / 11-15"}],"2021-22|VOLLEYBALL|HS|Boys|JV":[{"d":"2021/10/23","e":"TRIANGLE","l":"BFS","o":"ISB-2","r":"W","df":11,"s":"25-23 / 25-19 / 25-22"},{"d":"2021/10/23","e":"TRIANGLE","l":"BFS","o":"TCIS","r":"L","df":-25,"s":"18-25 / 16-25 / 16-25"},{"d":"2021/10/23","e":"TRIANGLE","l":"BFS","o":"TCIS","r":"L","df":-17,"s":"26-24 / 29-27 / 19-25 / 18-25 / 7-15"},{"d":"2021/11/20","e":"SKAC FIN","l":"ISB","o":"GIFS","r":"W","df":9,"s":"25-18 / 25-23"},{"d":"2021/11/20","e":"SKAC FIN","l":"ISB","o":"DIS-2","r":"W","df":29,"s":"25-14 / 25-7"},{"d":"2021/11/20","e":"SKAC FIN","l":"ISB","o":"ISB-2","r":"W","df":21,"s":"25-20 / 25-9"}],"2022-23|VOLLEYBALL|HS|Boys|Varsity":[{"d":"2022/09/29","e":"BOB","l":"ISB","o":"ISB","r":"W","df":21,"s":"25-19 / 25-11 / 24-26 / 25-22"},{"d":"2022/10/07","e":"BOB","l":"ISB","o":"ISB","r":"W","df":22,"s":"25-15 / 25-21 / 25-17"},{"d":"2022/10/07","e":"BOB","l":"ISB","o":"ISB","r":"W","df":5,"s":"25-22 / 8-25 / 25-6"},{"d":"2022/10/15","e":"SKAC DIV","l":"DIS","o":"HIS","r":"W","df":21,"s":"25-9 / 25-20"},{"d":"2022/10/15","e":"SKAC DIV","l":"DIS","o":"DIS","r":"W","df":13,"s":"25-16 / 25-21"},{"d":"2022/10/15","e":"SKAC DIV","l":"DIS","o":"ISB","r":"W","df":19,"s":"25-17 / 25-14"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"ISB","r":"W","df":17,"s":"25-15 / 25-18"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"DIS","r":"L","df":-13,"s":"22-25 / 15-25"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"HIS","r":"W","df":11,"s":"25-20 / 25-27 / 15-7"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"HIS","r":"L","df":-12,"s":"20-25 / 18-25"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"DIS","r":"L","df":4,"s":"19-25 / 25-11 / 11-15"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"ISB","r":"W","df":16,"s":"25-15 / 25-19"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"SJA","r":"L","df":-6,"s":"21-25 / 23-25"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"KISJ","r":"L","df":-18,"s":"20-25 / 12-25"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"NLCS","r":"L","df":-13,"s":"15-25 / 22-25"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"SPPS","r":"W","df":10,"s":"22-25 / 25-14 / 16-14"},{"d":"2022/11/26","e":"KISAC","l":"SJA","o":"ISB","r":"W","df":11,"s":"27-25 / 25-16"},{"d":"2022/11/26","e":"KISAC","l":"SJA","o":"KISJ","r":"L","df":-20,"s":"17-25 / 13-25"},{"d":"2022/11/26","e":"KISAC","l":"SJA","o":"SJA","r":"L","df":-3,"s":"25-17 / 26-27 / 5-15"}],"2022-23|VOLLEYBALL|HS|Boys|JV":[{"d":"2022/10/15","e":"SKAC DIV","l":"DIS","o":"HIS-2","r":"W","df":5,"s":"25-20 / 23-25 / 16-14"},{"d":"2022/10/15","e":"SKAC DIV","l":"DIS","o":"DIS-2","r":"W","df":8,"s":"25-21 / 25-21"},{"d":"2022/10/15","e":"SKAC DIV","l":"DIS","o":"ISB-2","r":"W","df":8,"s":"29-30 / 26-24 / 15-8"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"GIFS","r":"W","df":7,"s":"25-21 / 21-18"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"DIS-2","r":"W","df":59,"s":"28--26 / 25-20"},{"d":"2022/11/17","e":"SKAC FIN","l":"BFS","o":"HIS-2","r":"L","df":-14,"s":"23-25 / 13-25"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"KISJ-3","r":"L","df":-5,"s":"25-20 / 20-25 / 20-25"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"KISJ-2","r":"W","df":10,"s":"25-20 / 25-20"},{"d":"2022/11/25","e":"KISAC","l":"SJA","o":"SJA-2","r":"W","df":10,"s":"25-20 / 25-20"},{"d":"2022/11/26","e":"KISAC","l":"SJA","o":"ISB-2","r":"W","df":10,"s":"25-20 / 25-20"},{"d":"2022/11/26","e":"KISAC","l":"SJA","o":"NLCS-2","r":"W","df":10,"s":"25-20 / 25-20"},{"d":"2022/11/26","e":"KISAC","l":"SJA","o":"KISJ-2","r":"W","df":10,"s":"25-20 / 25-20"}],"2023-24|VOLLEYBALL|HS|Boys|Varsity":[{"d":"2023/09/26","e":"BOB","l":"BFS","o":"ISB","r":"W","df":-13,"s":"12-25 / 26-24 / 12-25 / 25-18 / 15-11"},{"d":"2023/10/14","e":"SKAC FIN","l":"ISB","o":"HIS","r":"L","df":-19,"s":"13-25 / 18-25"},{"d":"2023/10/14","e":"SKAC FIN","l":"ISB","o":"GIFS","r":"L","df":-1,"s":"25-23 / 22-25"},{"d":"2023/10/14","e":"SKAC FIN","l":"ISB","o":"KFS","r":"W","df":10,"s":"25-12 / 22-25"},{"d":"2023/10/25","e":"BOB","l":"ISB","o":"ISB","r":"L","df":-9,"s":"13-25 / 20-25 / 25-15 / 25-21 / 19-25"},{"d":"2023/10/27","e":"BINV","l":"BFS","o":"FPS","r":"W","df":12,"s":"25-21 / 25-17"},{"d":"2023/10/27","e":"BINV","l":"BFS","o":"HIS","r":"L","df":-19,"s":"11-25 / 20-25"},{"d":"2023/10/27","e":"BINV","l":"BFS","o":"DIS","r":"L","df":-21,"s":"10-25 / 19-25"},{"d":"2023/10/27","e":"BINV","l":"BFS","o":"CCAS","r":"W","df":15,"s":"25-16 / 25-19"},{"d":"2023/10/28","e":"BINV","l":"BFS","o":"HIS","r":"L","df":-18,"s":"11-25 / 28-26 / 9-15"},{"d":"2023/10/28","e":"BINV","l":"BFS","o":"CCAS","r":"W","df":13,"s":"25-14 / 27-25"},{"d":"2023/10/28","e":"BINV","l":"BFS","o":"FPS","r":"W","df":10,"s":"19-25 / 25-14 / 15-10"},{"d":"2023/10/28","e":"BINV","l":"BFS","o":"DIS","r":"L","df":-15,"s":"13-25 / 22-25"},{"d":"2023/11/17","e":"KISAC","l":"SJA","o":"KISJ","r":"L","df":-38,"s":"2-25 / 10-25"},{"d":"2023/11/17","e":"KISAC","l":"SJA","o":"SJA","r":"L","df":-17,"s":"15-25 / 18-25"},{"d":"2023/11/17","e":"KISAC","l":"SJA","o":"NLCS","r":"L","df":-19,"s":"16-25 / 15-25"},{"d":"2023/11/17","e":"KISAC","l":"SJA","o":"FPS","r":"L","df":-8,"s":"21-25 / 21-25"},{"d":"2023/11/18","e":"KISAC","l":"SJA","o":"DIS","r":"L","df":-14,"s":"21-25 / 15-25"},{"d":"2023/11/18","e":"KISAC","l":"SJA","o":"FPS","r":"L","df":-8,"s":"20-25 / 22-25"}],"2024-25|VOLLEYBALL|HS|Boys|Varsity":[{"d":"2024/09/23","e":"BOB","l":"ISB","o":"ISB","r":"W","df":6,"s":"25-19 / 27-29 / 29-27"},{"d":"2024/09/27","e":"JIT","l":"SJA","o":"TES","r":"L","df":-24,"s":"9-25 / 17-25"},{"d":"2024/09/27","e":"JIT","l":"SJA","o":"KISJ","r":"L","df":-30,"s":"9-25 / 11-25"},{"d":"2024/09/27","e":"JIT","l":"SJA","o":"BIS","r":"L","df":-17,"s":"25-20 / 12-25 / 6-15"},{"d":"2024/09/28","e":"JIT","l":"SJA","o":"SJA","r":"L","df":-12,"s":"25-27 / 15-25"},{"d":"2024/09/28","e":"JIT","l":"SJA","o":"HIS","r":"L","df":-6,"s":"21-25 / 25-23 / 11-15"},{"d":"2024/09/28","e":"JIT","l":"SJA","o":"BIS","r":"W","df":9,"s":"25-20 / 25-21"},{"d":"2024/10/11","e":"BINV","l":"BFS","o":"ISB","r":"W","df":8,"s":"23-25 / 25-18 / 15-12"},{"d":"2024/10/11","e":"BINV","l":"BFS","o":"DMHS","r":"W","df":25,"s":"25-12 / 25-13"},{"d":"2024/10/11","e":"BINV","l":"BFS","o":"GIFS","r":"W","df":19,"s":"25-16 / 25-15"},{"d":"2024/10/11","e":"BINV","l":"BFS","o":"DMHS","r":"W","df":25,"s":"25-19 / 25-6"},{"d":"2024/10/11","e":"BINV","l":"BFS","o":"ISB","r":"L","df":-24,"s":"18-25 / 8-25"},{"d":"2024/10/14","e":"BOB","l":"BFS","o":"ISB","r":"W","df":5,"s":"20-25 / 20-25 / 25-20 / 25-20 / 25-20"},{"d":"2024/10/17","e":"SKAIS","l":"BFS","o":"ISB","r":"W","df":22,"s":"25-12 / 25-16"},{"d":"2024/10/17","e":"SKAIS","l":"BFS","o":"DIS","r":"L","df":-18,"s":"13-25 / 19-25"},{"d":"2024/10/17","e":"SKAIS","l":"BFS","o":"GIFS","r":"W","df":16,"s":"25-11 / 25-23"},{"d":"2024/10/17","e":"SKAIS","l":"BFS","o":"DIS","r":"L","df":-4,"s":"24-26 / 23-25"},{"d":"2024/10/25","e":"KISAC","l":"KISJ","o":"NLCS","r":"L","df":-10,"s":"13-25 / 25-20 / 12-15"},{"d":"2024/10/25","e":"KISAC","l":"KISJ","o":"SJA","r":"L","df":-16,"s":"17-25 / 17-25"},{"d":"2024/10/25","e":"KISAC","l":"KISJ","o":"DIS","r":"L","df":-13,"s":"14-25 / 23-25"},{"d":"2024/10/26","e":"KISAC","l":"KISJ","o":"FPS","r":"W","df":8,"s":"25-23 / 25-19"},{"d":"2024/10/26","e":"KISAC","l":"KISJ","o":"DIS","r":"L","df":-6,"s":"22-25 / 25-23 / 10-15"}],"2025-26|VOLLEYBALL|HS|Boys|Varsity":[{"d":"2025/09/16","e":"BOB","l":"BFS","o":"ISB","r":"L","df":-5,"s":"25-20 / 20-25 / 20-25"},{"d":"2025/10/14","e":"BOB","l":"ISB","o":"ISB","r":"L","df":-30,"s":"9-25 / 16-25 / 20-25"},{"d":"2025/10/24","e":"KISAC","l":"SJA","o":"SJA","r":"L","df":-17,"s":"16-25 / 17-25"},{"d":"2025/10/24","e":"KISAC","l":"SJA","o":"FPS","r":"L","df":-12,"s":"15-25 / 23-25"},{"d":"2025/10/25","e":"KISAC","l":"SJA","o":"KISJ","r":"L","df":-23,"s":"6-25 / 21-25"},{"d":"2025/10/25","e":"KISAC","l":"SJA","o":"DIS","r":"L","df":-15,"s":"14-25 / 21-25"},{"d":"2025/10/25","e":"KISAC","l":"SJA","o":"FPS","r":"L","df":-13,"s":"14-25 / 24-26"},{"d":"2025/11/04","e":"SKAIS","l":"BFS","o":"ISB","r":"L","df":-2,"s":"21-25 / 25-18 / 10-15"},{"d":"2025/11/04","e":"SKAIS","l":"BFS","o":"DIS","r":"L","df":-32,"s":"9-25 / 9-25"},{"d":"2025/11/04","e":"SKAIS","l":"BFS","o":"GIFS","r":"W","df":20,"s":"25-15 / 25-15"},{"d":"2025/11/04","e":"SKAIS","l":"BFS","o":"DIS-2","r":"W","df":23,"s":"25-10 / 25-17"}],"2019-20|BASKETBALL|HS|Girls|Varsity":[{"d":"2020/02/08","e":"SKAC DIV","l":"GIFS","o":"ISB","r":"L","df":-8,"s":"6-14"},{"d":"2020/02/08","e":"SKAC DIV","l":"GIFS","o":"DIS","r":"W","df":8,"s":"16-8"},{"d":"2020/02/08","e":"SKAC DIV","l":"GIFS","o":"ISB-2","r":"W","df":15,"s":"21-6"},{"d":"2020/02/19","e":"SKAC FIN","l":"ISB","o":"ISK/BIA","r":"L","df":-2,"s":"6-8"},{"d":"2020/02/19","e":"SKAC FIN","l":"ISB","o":"GIFS","r":"W","df":9,"s":"13-4"},{"d":"2020/02/19","e":"SKAC FIN","l":"ISB","o":"BFS-2","r":"L","df":-16,"s":"21-37"},{"d":"2020/02/19","e":"SKAC FIN","l":"ISB","o":"DIS","r":"W","df":8,"s":"23-15"},{"d":"2020/02/19","e":"SKAC FIN","l":"ISB","o":"ISB","r":"L","df":-35,"s":"7-42"}],"2019-20|BASKETBALL|HS|Girls|JV":[{"d":"2020/02/08","e":"SKAC DIV","l":"GIFS","o":"ISB-2","r":"W","df":2,"s":"6-4"},{"d":"2020/02/08","e":"SKAC DIV","l":"GIFS","o":"ISK/BIA","r":"W","df":8,"s":"14-6"},{"d":"2020/02/08","e":"SKAC DIV","l":"GIFS","o":"GIFS","r":"W","df":8,"s":"12-4"},{"d":"2020/02/19","e":"SKAC FIN","l":"ISB","o":"DIS","r":"L","df":-5,"s":"16-21"},{"d":"2020/02/19","e":"SKAC FIN","l":"ISB","o":"ISB-2","r":"L","df":-20,"s":"12-32"}]};
+
+function getGamelog(s) {
+  const key = `${s.sy}|${s.sport}|${s.school}|${s.gender}|${s.level}`;
+  return GAMELOG[key] || [];
+}
+
+function formatPlacements(arr) {
+  if (!arr.length) return '<span style="color:var(--text-dim)">—</span>';
+  return arr.map(p => {
+    const isChamp = p.place === 1;
+    const ordinal = p.place === 1 ? '1st' : p.place === 2 ? '2nd' : p.place === 3 ? '3rd' : p.place + 'th';
+    if (isChamp) return `<span style="color:var(--gold);font-weight:700">🏆 ${ordinal} ${p.comp}</span>`;
+    if (p.place <= 3) return `<span style="color:var(--win);font-weight:500">${ordinal} ${p.comp}</span>`;
+    return `<span style="color:var(--text-dim)">${ordinal} ${p.comp}</span>`;
+  }).join(', ');
+}
+
+// ====== HELPERS ======
+function pct(w, l) { return (w + l) > 0 ? Math.round(w / (w + l) * 100) : 0; }
+function pctClass(p) { return p >= 70 ? 'pct-high' : p >= 45 ? 'pct-mid' : 'pct-low'; }
+function pctColor(p) { return p >= 70 ? 'var(--win)' : p >= 45 ? 'var(--gold)' : 'var(--loss)'; }
+function sportClass(s) { return s === 'VOLLEYBALL' ? 'vb' : s === 'BASKETBALL' ? 'bb' : 'fs'; }
+function sportLabel(s) { return s.charAt(0) + s.slice(1).toLowerCase(); }
+function marginStr(m) {
+  if (m > 0) return `<span class="margin-pos">+${m}</span>`;
+  if (m < 0) return `<span class="margin-neg">${m}</span>`;
+  return '<span style="color:var(--text-dim)">0.0</span>';
+}
+
+// HC / AC / Combined
+let hcW=0, hcL=0, acW=0, acL=0;
+DATA.seasons.forEach(s => {
+  if (getRole(s)==='HC') { hcW+=s.w; hcL+=s.l; } else { acW+=s.w; acL+=s.l; }
+});
+const allW=hcW+acW, allL=hcL+acL;
+
+const coachingSeasons = new Set();
+DATA.seasons.forEach(s => coachingSeasons.add(`${s.sy}|${getSeasonFromRow(s)}|${s.sport}|${s.school}|${s.gender}`));
+
+// ====== HEADER ======
+function renderHeader() {
+  document.getElementById('careerBadges').innerHTML = `
+    <div class="career-badge primary">
+      <div class="record">${hcW}–${hcL}</div>
+      <div class="pct" style="color:var(--win)">${pct(hcW,hcL)}%</div>
+      <div class="label">Head Coach</div>
+    </div>
+    <div class="career-badge">
+      <div class="record" style="font-size:24px">${acW}–${acL}</div>
+      <div class="pct" style="color:var(--text-dim)">${pct(acW,acL)}%</div>
+      <div class="label">Asst. Coach</div>
+    </div>
+    <div class="career-badge">
+      <div class="record" style="font-size:24px">${allW}–${allL}</div>
+      <div class="pct" style="color:var(--text-dim)">${pct(allW,allL)}%</div>
+      <div class="label">Combined</div>
+    </div>
+  `;
+}
+
+// ====== OVERVIEW ======
+function renderOverview() {
+  const hcG=hcW+hcL, acG=acW+acL;
+  document.getElementById('statGrid').innerHTML = [
+    {label:'Total Games',value:allW+allL,sub:`${hcG} as HC · ${acG} as AC`,cls:'highlight'},
+    {label:'School Years',value:7,sub:'2019–20 through 2025–26',cls:'highlight'},
+    {label:'Coaching Seasons',value:coachingSeasons.size,sub:'Fall · Winter · Spring',cls:'highlight'},
+    {label:'Sports',value:3,sub:'Volleyball · Basketball · Futsal',cls:'highlight'},
+    {label:'HC Record',value:`${hcW}–${hcL}`,sub:`${pct(hcW,hcL)}% win rate`,cls:'hc'},
+    {label:'AC Record',value:`${acW}–${acL}`,sub:`${pct(acW,acL)}% win rate`,cls:'ac'},
+  ].map(s=>`
+    <div class="stat-card ${s.cls}">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>
+  `).join('');
+
+  // Sport records
+  const sportData={};
+  DATA.seasons.forEach(s=>{
+    if(!sportData[s.sport]) sportData[s.sport]={hcW:0,hcL:0,acW:0,acL:0};
+    if(getRole(s)==='HC'){sportData[s.sport].hcW+=s.w;sportData[s.sport].hcL+=s.l;}
+    else{sportData[s.sport].acW+=s.w;sportData[s.sport].acL+=s.l;}
+  });
+
+  document.getElementById('sportRecords').innerHTML = [
+    {key:'BASKETBALL',name:'Basketball',cls:'bb'},
+    {key:'VOLLEYBALL',name:'Volleyball',cls:'vb'},
+    {key:'FUTSAL',name:'Futsal',cls:'fs'},
+  ].map(sp=>{
+    const d=sportData[sp.key]||{hcW:0,hcL:0,acW:0,acL:0};
+    const tw=d.hcW+d.acW, tl=d.hcL+d.acL, p=pct(tw,tl);
+    const hcT=d.hcW+d.hcL, acT=d.acW+d.acL;
+    let sub=`${tw}–${tl} (${p}%)`;
+    if(hcT>0&&acT>0) sub+=` · HC: ${d.hcW}–${d.hcL} · AC: ${d.acW}–${d.acL}`;
+    else if(acT>0) sub+=' · All as AC'; else sub+=' · All as HC';
+    return `
+      <div class="sport-record-card">
+        <div class="sport-name ${sp.cls}">${sp.name}</div>
+        <div class="win-bar-container">
+          <div class="win-bar ${sp.cls}" style="width:${p}%">${tw}W</div>
+        </div>
+        <div class="bar-labels"><span>${sub}</span><span>${tw+tl} games</span></div>
+      </div>`;
+  }).join('');
+
+  // Championships & Hardware
+  function renderHardware() {
+    let totalEntries = 0, champs = 0, podium = 0, allPlacements = [];
+    Object.entries(PLACEMENTS).forEach(([key, arr]) => {
+      const [sy, sport, school, gender, level] = key.split('|');
+      const s = {sy, sport, school, gender, level};
+      const role = getRole(s);
+      arr.forEach(p => {
+        totalEntries++;
+        if (p.place === 1) champs++;
+        if (p.place <= 3) podium++;
+        if (p.place <= 3) allPlacements.push({sy, sport, school, gender, level, comp: p.comp, place: p.place, of: p.of, role});
+      });
+    });
+    const podiumPct = totalEntries > 0 ? Math.round(podium / totalEntries * 100) : 0;
+
+    document.getElementById('hardwareGrid').innerHTML = [
+      {label:'🥇 Championships', value:champs, sub:`across ${Object.keys(DATA.by_year).length} school years`, cls:'highlight'},
+      {label:'🏅 Podium Finishes', value:podium, sub:`${podiumPct}% podium rate`, cls:'highlight'},
+      {label:'Event Entries', value:totalEntries, sub:`${champs} gold · ${podium - champs} silver/bronze`, cls:'highlight'},
+    ].map(s=>`
+      <div class="stat-card ${s.cls}">
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-sub">${s.sub}</div>
+      </div>`).join('');
+
+    // Group by sport
+    const bySport = {};
+    ['BASKETBALL','VOLLEYBALL','FUTSAL'].forEach(sp => bySport[sp] = []);
+    allPlacements.forEach(p => { if (bySport[p.sport]) bySport[p.sport].push(p); });
+
+    let html = '';
+    ['BASKETBALL','VOLLEYBALL','FUTSAL'].forEach(sp => {
+      const items = bySport[sp];
+      if (!items.length) return;
+      const golds = items.filter(i=>i.place===1);
+      const silvers = items.filter(i=>i.place===2);
+      const bronzes = items.filter(i=>i.place===3);
+      golds.sort((a,b) => a.sy.localeCompare(b.sy));
+      html += `
+        <div style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span class="sport-dot ${sportClass(sp)}"></span>
+            <span style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim)">${sportLabel(sp)}</span>
+            <span style="font-size:11px;color:var(--text-dim)">${golds.length}🥇 ${silvers.length}🥈 ${bronzes.length}🥉</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${golds.length ? golds.map(c => {
+              const roleTag = c.role === 'AC' ? ' <span style="font-size:9px;background:var(--ac-dim);color:var(--ac);padding:1px 4px;border-radius:3px;vertical-align:middle">AC</span>' : '';
+              return `<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #f59e0b;border-radius:8px;padding:6px 10px;min-width:120px;max-width:170px">
+                <div style="display:flex;align-items:center;gap:4px;margin-bottom:1px">
+                  <span style="font-size:13px">🥇</span>
+                  <span style="font-size:11px;font-weight:700;color:#92400e">Champion</span>
+                </div>
+                <div style="font-size:10px;font-weight:600;color:#92400e">${c.comp}${roleTag}</div>
+                <div style="font-size:10px;color:#a16207">${c.sy} · ${c.school} ${c.gender} ${c.level}</div>
+              </div>`;
+            }).join('') : '<div style="font-size:12px;color:var(--text-dim);font-style:italic">No championships yet</div>'}
+          </div>
+        </div>`;
+    });
+
+    document.getElementById('championshipList').innerHTML = html;
+  }
+  renderHardware();
+
+  // Season table — filterable and sortable
+  let sortCol = 'sy', sortDir = -1; // default: year desc
+
+  function renderSeasonTable() {
+    const fSport = document.getElementById('filterSport').value;
+    const fRole = document.getElementById('filterRole').value;
+    const fSeason = document.getElementById('filterSeason').value;
+    const fGender = document.getElementById('filterGender').value;
+    const fLevel = document.getElementById('filterLevel').value;
+
+    let filtered = DATA.seasons.filter(s => {
+      if (fSport && s.sport !== fSport) return false;
+      if (fRole && getRole(s) !== fRole) return false;
+      if (fSeason && getSeasonFromRow(s) !== fSeason) return false;
+      if (fGender && s.gender !== fGender) return false;
+      if (fLevel && s.school !== fLevel) return false;
+      return true;
+    });
+
+    const seasonOrder = { 'Fall': 0, 'Winter': 1, 'Spring': 2 };
+    filtered.sort((a, b) => {
+      let va, vb;
+      switch (sortCol) {
+        case 'sy': va = a.sy; vb = b.sy; break;
+        case 'season': va = seasonOrder[getSeasonFromRow(a)]; vb = seasonOrder[getSeasonFromRow(b)]; break;
+        case 'sport': va = a.sport; vb = b.sport; break;
+        case 'pct': va = a.pct; vb = b.pct; break;
+        case 'avg_margin': va = a.avg_margin; vb = b.avg_margin; break;
+        case 'total_diff': va = a.total_diff; vb = b.total_diff; break;
+        case 'games': va = a.games; vb = b.games; break;
+        default: va = a.sy; vb = b.sy;
+      }
+      if (typeof va === 'string') return va.localeCompare(vb) * sortDir;
+      return (va - vb) * sortDir;
+    });
+
+    document.getElementById('seasonTable').innerHTML = filtered.map(s => {
+      const role = getRole(s), season = getSeasonFromRow(s);
+      const roleTag = role === 'HC' ? '<span class="role-tag role-hc">Head Coach</span>' : '<span class="role-tag role-ac">Asst. Coach</span>';
+      const diffStr = s.total_diff > 0 ? `<span class="margin-pos">+${s.total_diff}</span>` : s.total_diff < 0 ? `<span class="margin-neg">${s.total_diff}</span>` : '<span style="color:var(--text-dim)">0</span>';
+      const sKey = `${s.sy}|${s.sport}|${s.school}|${s.gender}|${s.level}`;
+      return `
+        <tr style="${role === 'AC' ? 'opacity:0.65;' : ''}cursor:pointer;" onclick="toggleGamelog(this,'${sKey.replace(/'/g,"\\'")}')">
+          <td>${s.sy}</td>
+          <td>${season}</td>
+          <td><span class="school-tag">${SCHOOL}</span></td>
+          <td><span class="sport-dot ${sportClass(s.sport)}"></span>${sportLabel(s.sport)}</td>
+          <td>${s.school} ${s.gender}</td>
+          <td>${s.level}</td>
+          <td>${roleTag}</td>
+          <td><span class="pct-badge ${pctClass(s.pct)}">${s.pct}%</span></td>
+          <td><span class="record-w">${s.w}W</span> – <span class="record-l">${s.l}L</span></td>
+          <td>${marginStr(s.avg_margin)}</td>
+          <td>${diffStr}</td>
+          <td>${s.games}</td>
+          <td style="font-size:12px;white-space:nowrap">${formatPlacements(getPlacementsFor(s))}</td>
+        </tr>`;
+    }).join('');
+
+    // Update sort indicators
+    document.querySelectorAll('th.sortable').forEach(th => {
+      const col = th.dataset.sort;
+      if (col === sortCol) th.textContent = th.textContent.replace(/[▴▾]/g, '').trim() + (sortDir === 1 ? ' ▴' : ' ▾');
+      else th.textContent = th.textContent.replace(/[▴▾]/g, '').trim();
+    });
+
+    // Running totals
+    const tW = filtered.reduce((a,s) => a+s.w, 0);
+    const tL = filtered.reduce((a,s) => a+s.l, 0);
+    const tG = filtered.reduce((a,s) => a+s.games, 0);
+    const tDiff = filtered.reduce((a,s) => a+s.total_diff, 0);
+    const tPct = tG > 0 ? Math.round(tW/(tW+tL)*100) : 0;
+    const tAvg = tG > 0 ? (tDiff/tG).toFixed(1) : '0.0';
+    const tDiffStr = tDiff > 0 ? `<span class="margin-pos">+${tDiff}</span>` : tDiff < 0 ? `<span class="margin-neg">${tDiff}</span>` : '0';
+    const tChamps = filtered.reduce((a,s) => a + getPlacementsFor(s).filter(p=>p.place===1).length, 0);
+    document.getElementById('seasonTotals').innerHTML = `
+      <tr style="font-weight:700;border-top:2px solid var(--text);background:var(--surface2)">
+        <td colspan="4" style="padding:10px 12px">${filtered.length} seasons</td>
+        <td colspan="3"></td>
+        <td><span class="pct-badge ${pctClass(tPct)}">${tPct}%</span></td>
+        <td><span class="record-w">${tW}W</span> – <span class="record-l">${tL}L</span></td>
+        <td>${marginStr(parseFloat(tAvg))}</td>
+        <td>${tDiffStr}</td>
+        <td>${tG}</td>
+        <td style="font-size:12px">${tChamps > 0 ? tChamps + '🥇' : '—'}</td>
+      </tr>`;
+  }
+
+  // Filter event listeners
+  ['filterSport', 'filterRole', 'filterSeason', 'filterGender', 'filterLevel'].forEach(id => {
+    document.getElementById(id).addEventListener('change', renderSeasonTable);
+  });
+
+  // Sort event listeners
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.sort;
+      if (sortCol === col) sortDir *= -1;
+      else { sortCol = col; sortDir = -1; }
+      renderSeasonTable();
+    });
+  });
+
+  renderSeasonTable();
+}
+
+// ====== TRAJECTORY ======
+function renderTrajectory() {
+  const years=Object.entries(DATA.by_year).sort((a,b)=>a[0].localeCompare(b[0]));
+  const yearSports={};
+  DATA.seasons.forEach(s=>{if(!yearSports[s.sy])yearSports[s.sy]=new Set();yearSports[s.sy].add(s.sport);});
+
+  document.getElementById('yearTimeline').innerHTML = '<div style="display:flex;min-width:700px;">'+years.map(([sy,d])=>{
+    const p=pct(d.w,d.l),total=d.w+d.l;
+    const sports=yearSports[sy]?[...yearSports[sy]]:[];
+    const tags=sports.map(s=>`<span class="timeline-sport-tag tag-${sportClass(s)}">${sportLabel(s)}</span>`).join('');
+    return `
+      <div class="timeline-year">
+        <div class="year-label">${sy}</div>
+        <div class="year-record">${d.w}–${d.l}</div>
+        <div class="year-pct" style="color:${pctColor(p)}">${p}%</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-dim)">${total} gm</div>
+        <div style="margin-top:6px">${tags}</div>
+      </div>`;
+  }).join('')+'</div>';
+
+  // HC trajectory cards
+  const hcProg={};
+  DATA.seasons.forEach(s=>{
+    if(getRole(s)!=='HC')return;
+    const key=`${s.sport}|${s.school} ${s.gender}`;
+    if(!hcProg[key])hcProg[key]={sport:s.sport,label:`${s.school} ${s.gender}`,years:[]};
+    const ex=hcProg[key].years.find(y=>y.sy===s.sy);
+    if(ex){ex.w+=s.w;ex.l+=s.l;ex.games+=s.games;ex.marginSum+=s.avg_margin*s.games;}
+    else hcProg[key].years.push({sy:s.sy,w:s.w,l:s.l,games:s.games,marginSum:s.avg_margin*s.games});
+  });
+
+  const container=document.getElementById('trajectoryCards');
+  const progOrder=['VOLLEYBALL|HS Boys','VOLLEYBALL|HS Girls','BASKETBALL|MS Girls','BASKETBALL|MS Boys','BASKETBALL|HS Boys','FUTSAL|HS Girls'];
+
+  container.innerHTML = progOrder.filter(k=>hcProg[k]).map(key=>{
+    const prog=hcProg[key];
+    const seasons=prog.years.map(y=>({...y,pct:pct(y.w,y.l),avg_margin:Math.round((y.marginSum/y.games)*10)/10}));
+    const tW=seasons.reduce((a,s)=>a+s.w,0), tL=seasons.reduce((a,s)=>a+s.l,0);
+
+    const sparkBars=seasons.map(s=>{
+      const h=Math.max(8,(s.pct/100)*60), color=pctColor(s.pct);
+      return `<div class="spark-col">
+        <div class="spark-pct" style="color:${color}">${s.pct}%</div>
+        <div class="spark-bar" style="height:${h}px;background:${color}"></div>
+        <div class="spark-label">${s.sy}</div>
+      </div>`;
+    }).join('');
+
+    const marginTrend=seasons.map(s=>{
+      const color=s.avg_margin>=0?'var(--win)':'var(--loss)';
+      return `<span style="color:${color};font-weight:700;margin-right:16px">${s.sy}: ${s.avg_margin>0?'+':''}${s.avg_margin}</span>`;
+    }).join('');
+
+    return `
+      <div class="trajectory-card">
+        <div class="trajectory-header">
+          <div>
+            <span class="sport-dot ${sportClass(prog.sport)}"></span>
+            <span class="trajectory-name">${sportLabel(prog.sport)} — ${prog.label}</span>
+            <span class="role-tag role-hc" style="margin-left:8px">Head Coach</span>
+            <span class="school-tag" style="margin-left:6px">${SCHOOL}</span>
+          </div>
+          <div class="trajectory-overall">${tW}W–${tL}L overall (${pct(tW,tL)}%)</div>
+        </div>
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:8px">Win % by Season</div>
+        <div class="spark-row" style="max-width:400px">${sparkBars}</div>
+        <div style="margin-top:28px;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:8px">Avg Point/Set Margin</div>
+        <div style="font-size:13px;padding:8px 0;max-width:500px">${marginTrend}</div>
+      </div>`;
+  }).join('');
+
+  // AC programs
+  const acProg={};
+  DATA.seasons.forEach(s=>{
+    if(getRole(s)!=='AC')return;
+    const key=`${s.sport}|${s.school} ${s.gender}`;
+    if(!acProg[key])acProg[key]={sport:s.sport,label:`${s.school} ${s.gender}`,tw:0,tl:0,years:[],seasons:[]};
+    acProg[key].tw+=s.w;acProg[key].tl+=s.l;acProg[key].years.push(s.sy);
+    acProg[key].seasons.push(s);
+  });
+
+  if(Object.keys(acProg).length>0){
+    container.innerHTML+=`
+      <div style="margin-top:28px">
+        <div style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:12px">Assistant Coach Programs</div>
+        ${Object.values(acProg).map(p=>{
+          const seasons = p.seasons.sort((a,b)=>a.sy.localeCompare(b.sy));
+          const sparkBars = seasons.map(s=>{
+            const total=s.w+s.l;const wp=total>0?Math.round(s.w/total*100):0;
+            return `<div style="text-align:center;min-width:48px">
+              <div style="font-size:10px;color:var(--text-dim)">${s.sy.split('-')[0]}</div>
+              <div style="height:32px;display:flex;align-items:flex-end;justify-content:center">
+                <div style="width:24px;height:${Math.max(wp*0.32,2)}px;background:var(--ac);border-radius:2px;opacity:0.7"></div>
+              </div>
+              <div style="font-size:10px;font-weight:600;margin-top:2px">${s.w}-${s.l}</div>
+              <div style="font-size:9px;color:var(--text-dim)">${wp}%</div>
+            </div>`;
+          }).join('');
+          return `
+          <div class="trajectory-card" style="opacity:0.7">
+            <div class="trajectory-header">
+              <div>
+                <span class="sport-dot ${sportClass(p.sport)}"></span>
+                <span class="trajectory-name">${sportLabel(p.sport)} — ${p.label}</span>
+                <span class="role-tag role-ac" style="margin-left:8px">Asst. Coach</span>
+                <span class="school-tag" style="margin-left:6px">${SCHOOL}</span>
+              </div>
+              <div class="trajectory-overall">${p.tw}W–${p.tl}L (${pct(p.tw,p.tl)}%) · ${[...new Set(p.years)].join(', ')}</div>
+            </div>
+            <div class="spark-row" style="display:flex;gap:8px;margin-top:12px;max-width:500px">${sparkBars}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }
+}
+
+// ====== PROGRAMS ======
+function renderPrograms() {
+  const allYears=['2019-20','2020-21','2021-22','2022-23','2023-24','2024-25','2025-26'];
+  const progMap={};
+  DATA.seasons.forEach(s=>{
+    const role=getRole(s), key=`${s.sport}|${s.school} ${s.gender}|${s.level}`;
+    if(!progMap[key])progMap[key]={sport:s.sport,label:`${s.school} ${s.gender} ${s.level}`,years:{},tw:0,tl:0,roles:new Set()};
+    progMap[key].years[s.sy]={...s,role};
+    progMap[key].tw+=s.w;progMap[key].tl+=s.l;progMap[key].roles.add(role);
+  });
+
+  let html=`<table style="min-width:900px">
+    <thead><tr><th>School</th><th>Program</th><th>Role</th>${allYears.map(y=>`<th style="text-align:center">${y}</th>`).join('')}</tr></thead><tbody>`;
+
+  Object.values(progMap).sort((a,b)=>a.sport.localeCompare(b.sport)||a.label.localeCompare(b.label)).forEach(p=>{
+    const roleStr=[...p.roles].map(r=>r==='HC'?'<span class="role-tag role-hc">HC</span>':'<span class="role-tag role-ac">AC</span>').join(' ');
+    html+=`<tr><td><span class="school-tag">${SCHOOL}</span></td><td><span class="sport-dot ${sportClass(p.sport)}"></span>${sportLabel(p.sport)} ${p.label}</td><td>${roleStr}</td>`;
+    allYears.forEach(y=>{
+      if(p.years[y]){
+        const s=p.years[y],pc=pct(s.w,s.l),op=s.role==='AC'?'opacity:0.6;':'';
+        html+=`<td style="text-align:center;${op}"><span class="pct-badge ${pctClass(pc)}" style="font-size:11px">${s.w}-${s.l}</span></td>`;
+      } else html+=`<td style="text-align:center;color:var(--border)">—</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('programTimeline').innerHTML=html;
+
+  // Totals
+  const progArr=Object.values(progMap).sort((a,b)=>(b.tw+b.tl)-(a.tw+a.tl));
+  document.getElementById('programTotals').innerHTML=`<div class="chart-container"><div class="chart-title">Lifetime Record by Team</div><div class="bar-chart">${progArr.map(p=>{
+    const pc=pct(p.tw,p.tl);
+    const roleInd=[...p.roles].includes('AC')?' <span style="color:var(--ac);font-size:10px">(AC)</span>':'';
+    return `
+      <div class="bar-row">
+        <div class="bar-label"><span class="sport-dot ${sportClass(p.sport)}"></span>${sportLabel(p.sport)} · ${p.label}${roleInd}</div>
+        <div class="bar-track"><div class="bar-fill ${sportClass(p.sport)}" style="width:${pc}%"></div></div>
+        <div class="bar-value" style="color:${pctColor(pc)}">${p.tw}-${p.tl}</div>
+      </div>`;
+  }).join('')}</div></div>`;
+}
+
+// ====== COMPETITION ======
+function renderCompetition() {
+  const tiers=[
+    {key:'SKAC/SKAIS (Regional)',name:'SKAC / SKAIS',desc:'Regional'},
+    {key:'BOB (Rival Series)',name:'Battle of Busan',desc:'Rival Series'},
+    {key:'Invitationals',name:'Invitationals',desc:'BINV · JIT · Tri · B7'},
+    {key:'KISAC (National)',name:'KISAC',desc:'National'},
+  ];
+
+  document.getElementById('tierGrid').innerHTML=tiers.map(t=>{
+    const d=DATA.by_event_tier[t.key]||{w:0,l:0}, p=pct(d.w,d.l);
+    return `
+      <div class="tier-card">
+        <div class="tier-name">${t.name}</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">${t.desc}</div>
+        <div class="tier-record">${d.w}–${d.l}</div>
+        <div class="tier-pct" style="color:${pctColor(p)}">${p}%</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px">${d.w+d.l} games</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('tierBars').innerHTML=tiers.map(t=>{
+    const d=DATA.by_event_tier[t.key]||{w:0,l:0}, p=pct(d.w,d.l);
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${t.name}</div>
+        <div class="bar-track"><div class="bar-fill win" style="width:${p}%"></div></div>
+        <div class="bar-value" style="color:${pctColor(p)}">${p}%</div>
+      </div>`;
+  }).join('');
+}
+
+
+// ====== GAMELOG TOGGLE ======
+function toggleGamelog(tr, key) {
+  const existing = tr.nextElementSibling;
+  if (existing && existing.classList.contains('gamelog-row')) {
+    existing.remove();
+    return;
+  }
+  // Remove any other open gamelog
+  document.querySelectorAll('.gamelog-row').forEach(r => r.remove());
+  
+  const games = GAMELOG[key] || [];
+  if (!games.length) return;
+  
+  const newRow = document.createElement('tr');
+  newRow.className = 'gamelog-row';
+  const cols = tr.children.length;
+  newRow.innerHTML = `<td colspan="${cols}" style="padding:0;background:var(--surface2)">
+    <div style="padding:12px 16px;max-height:400px;overflow-y:auto">
+      <table style="width:100%;font-size:12px;margin:0">
+        <thead><tr style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim)">
+          <th style="padding:4px 8px">Date</th><th style="padding:4px 8px">Event</th><th style="padding:4px 8px">Location</th><th style="padding:4px 8px">Opponent</th><th style="padding:4px 8px">Score</th><th style="padding:4px 8px">Result</th><th style="padding:4px 8px">+/−</th>
+        </tr></thead>
+        <tbody>${games.map(g => {
+          const rColor = g.r === 'W' ? 'var(--win)' : 'var(--loss)';
+          const diffStr = g.df > 0 ? `<span class="margin-pos">+${g.df}</span>` : g.df < 0 ? `<span class="margin-neg">${g.df}</span>` : '0';
+          return `<tr style="border-top:1px solid var(--border)">
+            <td style="padding:4px 8px;white-space:nowrap">${g.d}</td>
+            <td style="padding:4px 8px">${g.e}</td>
+            <td style="padding:4px 8px">${g.l}</td>
+            <td style="padding:4px 8px;font-weight:500">${g.o}</td>
+            <td style="padding:4px 8px;font-family:monospace;white-space:nowrap">${g.s}</td>
+            <td style="padding:4px 8px;font-weight:700;color:${rColor}">${g.r}</td>
+            <td style="padding:4px 8px">${diffStr}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+  </td>`;
+  tr.after(newRow);
+}
+
+// ====== SPORT DEEP DIVES ======
+const VB_STATS = {"ALL":{"mw":62,"ml":60,"sw":152,"sl":146,"by_set_count":{"3":{"w":19,"l":16},"2":{"w":39,"l":41},"5":{"w":3,"l":2},"4":{"w":1,"l":1}},"comeback":{"w":9,"l":50,"t":59},"collapse":{"w":53,"l":10,"t":63},"set_positions":{"1":{"avg_bfs":21.1,"avg_opp":20.7,"sw":63,"sl":59,"n":122},"2":{"avg_bfs":21.7,"avg_opp":21.3,"sw":60,"sl":62,"n":122},"3":{"avg_bfs":16.3,"avg_opp":16.0,"sw":22,"sl":20,"n":42},"4":{"avg_bfs":22.3,"avg_opp":21.6,"sw":5,"sl":2,"n":7},"5":{"avg_bfs":16.6,"avg_opp":19.2,"sw":2,"sl":3,"n":5}}},"HC":{"mw":56,"ml":51,"sw":138,"sl":126,"by_set_count":{"2":{"w":35,"l":34},"3":{"w":17,"l":14},"5":{"w":3,"l":2},"4":{"w":1,"l":1}},"comeback":{"w":8,"l":42,"t":50},"collapse":{"w":48,"l":9,"t":57},"set_positions":{"1":{"avg_bfs":21.2,"avg_opp":20.7,"sw":57,"sl":50,"n":107},"2":{"avg_bfs":21.7,"avg_opp":21.4,"sw":54,"sl":53,"n":107},"3":{"avg_bfs":16.4,"avg_opp":16.2,"sw":20,"sl":18,"n":38},"4":{"avg_bfs":22.3,"avg_opp":21.6,"sw":5,"sl":2,"n":7},"5":{"avg_bfs":16.6,"avg_opp":19.2,"sw":2,"sl":3,"n":5}}},"AC":{"mw":6,"ml":9,"sw":14,"sl":20,"by_set_count":{"3":{"w":2,"l":2},"2":{"w":4,"l":7}},"comeback":{"w":1,"l":8,"t":9},"collapse":{"w":5,"l":1,"t":6},"set_positions":{"1":{"avg_bfs":20.8,"avg_opp":20.7,"sw":6,"sl":9,"n":15},"2":{"avg_bfs":21.7,"avg_opp":20.5,"sw":6,"sl":9,"n":15},"3":{"avg_bfs":15.0,"avg_opp":14.0,"sw":2,"sl":2,"n":4}}}};
+
+const BB_STATS = {"ALL":{"mw":83,"ml":39,"total_pts_for":2891,"total_pts_against":2289,"blowouts_w":20,"blowouts_l":15,"close_w":13,"close_l":7,"ppg_for":23.7,"ppg_against":18.8,"avg_margin":4.9,"margin_dist":{"W by 20+":20,"W by 10-19":30,"W by 1-9":33,"L by 1-9":13,"L by 10-19":11,"L by 20+":15}},"HC":{"mw":65,"ml":35,"total_pts_for":2346,"total_pts_against":1978,"blowouts_w":16,"blowouts_l":14,"close_w":13,"close_l":6,"ppg_for":23.5,"ppg_against":19.8,"avg_margin":3.7,"margin_dist":{"W by 20+":16,"W by 10-19":20,"W by 1-9":29,"L by 1-9":11,"L by 10-19":10,"L by 20+":14}},"AC":{"mw":18,"ml":4,"total_pts_for":545,"total_pts_against":311,"blowouts_w":4,"blowouts_l":1,"close_w":0,"close_l":1,"ppg_for":24.8,"ppg_against":14.1,"avg_margin":10.6,"margin_dist":{"W by 20+":4,"W by 10-19":10,"W by 1-9":4,"L by 1-9":2,"L by 10-19":1,"L by 20+":1}}};
+
+const DEEP_STATS = {"vb_decider":{"w":16,"l":15},"vb_set_margins":{"tight":{"w":30,"l":35},"mid":{"w":58,"l":49},"blow":{"w":64,"l":62}},"bb_home_away":{"home":{"w":22,"l":4},"away":{"w":61,"l":35}},"vb_home_away":{"home":{"w":20,"l":18},"away":{"w":42,"l":42}},"venue":{"ISB":{"w":49,"l":19},"BFS":{"w":42,"l":22},"SJA":{"w":9,"l":28},"DIS":{"w":17,"l":8},"GIFS":{"w":17,"l":6},"KISJ":{"w":3,"l":18},"HIS":{"w":14,"l":0}},"multiday":{"day1":{"w":13,"l":34},"day2":{"w":16,"l":27}}};
+
+const FS_STATS = {"ALL":{"mw":6,"ml":2,"total_gf":30,"total_ga":11,"gpg_for":3.8,"gpg_against":1.4,"margin_dist":{"W by 3+":4,"W by 1-2":2,"Draw":0,"L by 1-2":2,"L by 3+":0}}};
+
+function renderDeepDive(sport, role) {
+  const container = document.getElementById('deepDiveContent');
+  let html = '';
+  if (sport === 'VOLLEYBALL') { renderVBDive(container, role); html = container.innerHTML; }
+  else if (sport === 'BASKETBALL') { renderBBDive(container, role); html = container.innerHTML; }
+  else if (sport === 'FUTSAL') { renderFSDive(container); html = container.innerHTML; }
+
+  // Cross-sport insights (always shown)
+  const venueRows = Object.entries(DEEP_STATS.venue).map(([v,d]) => {
+    const t=d.w+d.l, p=pct(d.w,d.l);
+    const isHome = v==='BFS';
+    return `<div class="bar-row"><div class="bar-label">${v}${isHome?' (Home)':''}</div><div class="bar-track"><div class="bar-fill win" style="width:${p}%"></div></div><div class="bar-value" style="color:${pctColor(p)}">${d.w}W-${d.l}L (${p}%)</div></div>`;
+  }).join('');
+
+  const d1=DEEP_STATS.multiday.day1, d2=DEEP_STATS.multiday.day2;
+  const d1p=pct(d1.w,d1.l), d2p=pct(d2.w,d2.l);
+
+  html += `
+    <div style="margin-top:32px;padding-top:24px;border-top:2px solid var(--border)">
+      <div class="section-subtitle">Cross-Sport: Performance by Venue</div>
+      <div class="section-desc">All sports combined. Win rate at each host school (3+ games).</div>
+      <div class="chart-container"><div class="bar-chart" style="max-width:550px">${venueRows}</div></div>
+      <div class="section-subtitle">Cross-Sport: Day 1 vs Day 2 at Tournaments</div>
+      <div class="section-desc">At multi-day events, how do your teams perform on the opening day vs subsequent days?</div>
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div class="stat-card" style="border-left:3px solid var(--loss)"><div class="stat-label">Day 1</div><div class="stat-value" style="font-size:28px">${d1.w}W–${d1.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(d1p)}">${d1p}%</span> win rate</div></div>
+        <div class="stat-card" style="border-left:3px solid var(--win)"><div class="stat-label">Day 2+</div><div class="stat-value" style="font-size:28px">${d2.w}W–${d2.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(d2p)}">${d2p}%</span> win rate</div></div>
+      </div>
+    </div>`;
+
+  container.innerHTML = html;
+}
+
+function renderVBDive(el, role) {
+  const v = VB_STATS[role];
+  if (!v || (v.mw+v.ml)===0) { el.innerHTML='<div style="color:var(--text-dim);padding:24px;">No volleyball data for this role filter.</div>'; return; }
+  const matchP=pct(v.mw,v.ml), setP=pct(v.sw,v.sl);
+  const setCountHtml=[2,3,4,5].filter(n=>v.by_set_count[n]).map(n=>{
+    const d=v.by_set_count[n],total=d.w+d.l,p=pct(d.w,d.l);
+    return `<div class="bar-row"><div class="bar-label">${n}-set matches</div><div class="bar-track"><div class="bar-fill win" style="width:${p}%"></div></div><div class="bar-value" style="color:${pctColor(p)}">${d.w}W-${d.l}L (${p}%)</div></div>`;
+  }).join('');
+  const cb=v.comeback,cl=v.collapse;
+  const cbP=cb.t>0?Math.round(cb.w/cb.t*100):0, clP=cl.t>0?Math.round(cl.w/cl.t*100):0;
+  const setRows=Object.entries(v.set_positions).map(([pos,d])=>{
+    const p=pct(d.sw,d.sl);
+    return `<tr><td style="font-weight:700">Set ${pos}</td><td>${d.avg_bfs}</td><td>${d.avg_opp}</td><td class="record-w">${d.sw}</td><td class="record-l">${d.sl}</td><td><span class="pct-badge ${pctClass(p)}">${p}%</span></td></tr>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="stat-grid">${[
+      {label:'Match Record',value:`${v.mw}–${v.ml}`,sub:`${matchP}% win rate`,cls:'volleyball'},
+      {label:'Set Record',value:`${v.sw}–${v.sl}`,sub:`${setP}% set win rate`,cls:'volleyball'},
+      {label:'Total Matches',value:v.mw+v.ml,sub:`${((v.sw+v.sl)/(v.mw+v.ml)).toFixed(1)} sets/match`,cls:'highlight'},
+    ].map(s=>`<div class="stat-card ${s.cls}"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div><div class="stat-sub">${s.sub}</div></div>`).join('')}</div>
+    <div class="section-subtitle">Record by Match Length</div><div class="section-desc">Quick sweeps vs extended battles.</div>
+    <div class="chart-container"><div class="chart-title">Win Rate by Set Count</div><div class="bar-chart" style="max-width:550px">${setCountHtml}</div></div>
+    <div class="section-subtitle">Momentum & Resilience</div><div class="section-desc">Set 1 outcome as a predictor.</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+      <div class="stat-card" style="border-left:3px solid var(--win)"><div class="stat-label">Won Set 1 → Match Result</div><div class="stat-value" style="font-size:28px">${cl.w}W–${cl.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(clP)}">${clP}% conversion</span> from ${cl.t} matches</div></div>
+      <div class="stat-card" style="border-left:3px solid var(--loss)"><div class="stat-label">Lost Set 1 → Match Result</div><div class="stat-value" style="font-size:28px">${cb.w}W–${cb.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(cbP)}">${cbP}% comeback rate</span> from ${cb.t} matches</div></div>
+    </div>
+    <div class="section-subtitle">Performance by Set Position</div><div class="section-desc">Average scores and win rates per set.</div>
+    <div class="table-wrap" style="max-width:700px"><table><thead><tr><th>Set</th><th>BFS Avg</th><th>OPP Avg</th><th>Won</th><th>Lost</th><th>Win %</th></tr></thead><tbody>${setRows}</tbody></table></div>
+    <div class="section-subtitle">Closing Ability</div><div class="section-desc">When tied 1-1 after two sets, who wins the decider?</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="stat-card" style="border-left:3px solid var(--gold)"><div class="stat-label">Decider Record (1-1 → Set 3)</div><div class="stat-value" style="font-size:28px">${DEEP_STATS.vb_decider.w}W–${DEEP_STATS.vb_decider.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(pct(DEEP_STATS.vb_decider.w,DEEP_STATS.vb_decider.l))}">${pct(DEEP_STATS.vb_decider.w,DEEP_STATS.vb_decider.l)}% close-out rate</span></div></div>
+    </div>
+    <div class="section-subtitle">Set Competitiveness</div><div class="section-desc">How your sets break down by margin: tight (≤3 pts), competitive (4-7), or blowout (8+).</div>
+    <div class="chart-container"><div class="bar-chart" style="max-width:550px">
+      ${[{k:'tight',label:'Tight (≤3 pts)'},{k:'mid',label:'Competitive (4-7 pts)'},{k:'blow',label:'Blowout (8+ pts)'}].map(b=>{const d=DEEP_STATS.vb_set_margins[b.k];const p=pct(d.w,d.l);return `<div class="bar-row"><div class="bar-label">${b.label}</div><div class="bar-track"><div class="bar-fill win" style="width:${p}%"></div></div><div class="bar-value" style="color:${pctColor(p)}">${d.w}W-${d.l}L (${p}%)</div></div>`;}).join('')}
+    </div></div>
+    <div class="section-subtitle">Home vs Away</div><div class="section-desc">BFS-hosted matches vs traveling.</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="stat-card"><div class="stat-label">Home (BFS)</div><div class="stat-value" style="font-size:24px">${DEEP_STATS.vb_home_away.home.w}W–${DEEP_STATS.vb_home_away.home.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(pct(DEEP_STATS.vb_home_away.home.w,DEEP_STATS.vb_home_away.home.l))}">${pct(DEEP_STATS.vb_home_away.home.w,DEEP_STATS.vb_home_away.home.l)}%</span></div></div>
+      <div class="stat-card"><div class="stat-label">Away</div><div class="stat-value" style="font-size:24px">${DEEP_STATS.vb_home_away.away.w}W–${DEEP_STATS.vb_home_away.away.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(pct(DEEP_STATS.vb_home_away.away.w,DEEP_STATS.vb_home_away.away.l))}">${pct(DEEP_STATS.vb_home_away.away.w,DEEP_STATS.vb_home_away.away.l)}%</span></div></div>
+    </div>`;
+}
+
+function renderBBDive(el, role) {
+  const b = BB_STATS[role];
+  if (!b || (b.mw+b.ml)===0) { el.innerHTML='<div style="color:var(--text-dim);padding:24px;">No basketball data for this role filter.</div>'; return; }
+  const p=pct(b.mw,b.ml);
+  const distBars=Object.entries(b.margin_dist).map(([k,v])=>{
+    const maxVal=Math.max(...Object.values(b.margin_dist));
+    const width=maxVal>0?Math.round(v/maxVal*100):0;
+    const isWin=k.startsWith('W');
+    return `<div class="bar-row"><div class="bar-label">${k}</div><div class="bar-track"><div class="bar-fill ${isWin?'win':''}" style="width:${width}%;${isWin?'':'background:var(--loss)'}"></div></div><div class="bar-value">${v}</div></div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="stat-grid">${[
+      {label:'Record',value:`${b.mw}–${b.ml}`,sub:`${p}% win rate`,cls:'basketball'},
+      {label:'PPG Scored',value:b.ppg_for,sub:`${b.total_pts_for} total points`,cls:'basketball'},
+      {label:'PPG Allowed',value:b.ppg_against,sub:`${b.total_pts_against} total points`,cls:'highlight'},
+      {label:'Avg Margin',value:(b.avg_margin>0?'+':'')+b.avg_margin,sub:`${b.avg_margin>=0?'Outscoring':'Outscored by'} opponents`,cls:'highlight'},
+    ].map(s=>`<div class="stat-card ${s.cls}"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div><div class="stat-sub">${s.sub}</div></div>`).join('')}</div>
+    <div class="section-subtitle">Close Games & Blowouts</div><div class="section-desc">How you perform in different game types.</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="stat-card" style="border-left:3px solid var(--win)"><div class="stat-label">Blowout Wins (20+)</div><div class="stat-value" style="font-size:28px">${b.blowouts_w}</div></div>
+      <div class="stat-card" style="border-left:3px solid var(--loss)"><div class="stat-label">Blowout Losses (20+)</div><div class="stat-value" style="font-size:28px">${b.blowouts_l}</div></div>
+      <div class="stat-card" style="border-left:3px solid var(--gold)"><div class="stat-label">Close Wins (≤5pt)</div><div class="stat-value" style="font-size:28px">${b.close_w}</div></div>
+      <div class="stat-card" style="border-left:3px solid var(--gold)"><div class="stat-label">Close Losses (≤5pt)</div><div class="stat-value" style="font-size:28px">${b.close_l}</div></div>
+    </div>
+    <div class="section-subtitle">Margin Distribution</div><div class="section-desc">Breakdown of game outcomes by point margin.</div>
+    <div class="chart-container"><div class="chart-title">Games by Margin</div><div class="bar-chart" style="max-width:550px">${distBars}</div></div>
+    <div class="section-subtitle">Home vs Away</div><div class="section-desc">BFS-hosted games vs traveling.</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="stat-card"><div class="stat-label">Home (BFS)</div><div class="stat-value" style="font-size:24px">${DEEP_STATS.bb_home_away.home.w}W–${DEEP_STATS.bb_home_away.home.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(pct(DEEP_STATS.bb_home_away.home.w,DEEP_STATS.bb_home_away.home.l))}">${pct(DEEP_STATS.bb_home_away.home.w,DEEP_STATS.bb_home_away.home.l)}%</span></div></div>
+      <div class="stat-card"><div class="stat-label">Away</div><div class="stat-value" style="font-size:24px">${DEEP_STATS.bb_home_away.away.w}W–${DEEP_STATS.bb_home_away.away.l}L</div><div class="stat-sub"><span class="pct-badge ${pctClass(pct(DEEP_STATS.bb_home_away.away.w,DEEP_STATS.bb_home_away.away.l))}">${pct(DEEP_STATS.bb_home_away.away.w,DEEP_STATS.bb_home_away.away.l)}%</span></div></div>
+    </div>`;
+}
+
+function renderFSDive(el) {
+  const f = FS_STATS['ALL'];
+  if (!f || (f.mw+f.ml)===0) { el.innerHTML='<div style="color:var(--text-dim);padding:24px;">No futsal data available.</div>'; return; }
+  const p=pct(f.mw,f.ml);
+  const distBars=Object.entries(f.margin_dist).map(([k,v])=>{
+    const maxVal=Math.max(...Object.values(f.margin_dist).filter(x=>x>0),1);
+    const width=maxVal>0?Math.round(v/maxVal*100):0;
+    const isWin=k.startsWith('W');
+    const isDraw=k.startsWith('D');
+    return `<div class="bar-row"><div class="bar-label">${k}</div><div class="bar-track"><div class="bar-fill" style="width:${width}%;background:${isWin?'var(--win)':isDraw?'var(--gold)':'var(--loss)'}"></div></div><div class="bar-value">${v}</div></div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div style="color:var(--text-dim);font-size:13px;margin-bottom:16px;font-style:italic">Limited data — 1 season (2021-22), 8 games. All as Head Coach.</div>
+    <div class="stat-grid">${[
+      {label:'Record',value:`${f.mw}–${f.ml}`,sub:`${p}% win rate`,cls:'futsal'},
+      {label:'Goals/Game For',value:f.gpg_for,sub:`${f.total_gf} total goals`,cls:'futsal'},
+      {label:'Goals/Game Against',value:f.gpg_against,sub:`${f.total_ga} total goals`,cls:'highlight'},
+    ].map(s=>`<div class="stat-card ${s.cls}"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div><div class="stat-sub">${s.sub}</div></div>`).join('')}</div>
+    <div class="section-subtitle">Result Distribution</div>
+    <div class="chart-container"><div class="chart-title">Games by Goal Margin</div><div class="bar-chart" style="max-width:550px">${distBars}</div></div>`;
+}
+
+document.getElementById('ddSport').addEventListener('change', function() {
+  const role = document.getElementById('ddRole').value;
+  renderDeepDive(this.value, role);
+});
+document.getElementById('ddRole').addEventListener('change', function() {
+  const sport = document.getElementById('ddSport').value;
+  renderDeepDive(sport, this.value);
+});
+
+// ====== OPPONENTS ======
+const OPP_DATA = {"ISB":{"w":45,"l":19,"teams":{"ISB":{"w":32,"l":16},"ISB-2":{"w":11,"l":2},"ISB-3":{"w":2,"l":1}},"by_sport":{"BASKETBALL":{"w":19,"l":11},"FUTSAL":{"w":4,"l":0},"VOLLEYBALL":{"w":22,"l":8}}},"DIS":{"w":34,"l":22,"teams":{"DIS":{"w":17,"l":19},"DIS-2":{"w":15,"l":3},"DIS-3":{"w":2,"l":0}},"by_sport":{"BASKETBALL":{"w":26,"l":8},"FUTSAL":{"w":0,"l":1},"VOLLEYBALL":{"w":8,"l":13}}},"HIS":{"w":25,"l":8,"teams":{"HIS":{"w":14,"l":7},"HIS-2":{"w":11,"l":1}},"by_sport":{"BASKETBALL":{"w":19,"l":1},"VOLLEYBALL":{"w":6,"l":7}}},"FPS":{"w":10,"l":7,"teams":{"FPS":{"w":6,"l":7},"FPS-2":{"w":4,"l":0}},"by_sport":{"BASKETBALL":{"w":7,"l":3},"VOLLEYBALL":{"w":3,"l":4}}},"SJA":{"w":2,"l":12,"teams":{"SJA":{"w":1,"l":10},"SJA-2":{"w":1,"l":2}},"by_sport":{"BASKETBALL":{"w":0,"l":6},"FUTSAL":{"w":1,"l":0},"VOLLEYBALL":{"w":1,"l":6}}},"KISJ":{"w":3,"l":10,"teams":{"KISJ":{"w":1,"l":7},"KISJ-2":{"w":2,"l":2},"KISJ-3":{"w":0,"l":1}},"by_sport":{"BASKETBALL":{"w":1,"l":2},"VOLLEYBALL":{"w":2,"l":8}}},"GIFS":{"w":9,"l":1,"teams":{"GIFS":{"w":9,"l":1}},"by_sport":{"BASKETBALL":{"w":3,"l":0},"VOLLEYBALL":{"w":6,"l":1}}},"NLCS":{"w":3,"l":6,"teams":{"NLCS":{"w":2,"l":5},"NLCS-2":{"w":1,"l":1}},"by_sport":{"BASKETBALL":{"w":1,"l":2},"FUTSAL":{"w":1,"l":1},"VOLLEYBALL":{"w":1,"l":3}}},"CCAS":{"w":2,"l":3,"teams":{"CCAS":{"w":2,"l":3}},"by_sport":{"BASKETBALL":{"w":0,"l":3},"VOLLEYBALL":{"w":2,"l":0}}},"KFS":{"w":4,"l":0,"teams":{"KFS":{"w":4,"l":0}},"by_sport":{"VOLLEYBALL":{"w":4,"l":0}}},"TCIS":{"w":0,"l":4,"teams":{"TCIS":{"w":0,"l":4}},"by_sport":{"VOLLEYBALL":{"w":0,"l":4}}},"BHA":{"w":0,"l":3,"teams":{"BHA":{"w":0,"l":3}},"by_sport":{"BASKETBALL":{"w":0,"l":1},"VOLLEYBALL":{"w":0,"l":2}}},"BFS":{"w":1,"l":2,"teams":{"BFS":{"w":0,"l":1},"BFS-2":{"w":1,"l":1}},"by_sport":{"VOLLEYBALL":{"w":1,"l":1},"BASKETBALL":{"w":0,"l":1}}},"ISK/BIA":{"w":2,"l":1,"teams":{"ISK/BIA":{"w":2,"l":1}},"by_sport":{"VOLLEYBALL":{"w":1,"l":0},"BASKETBALL":{"w":1,"l":1}}},"BIS":{"w":1,"l":2,"teams":{"BIS":{"w":1,"l":2}},"by_sport":{"VOLLEYBALL":{"w":1,"l":2}}},"AIS":{"w":2,"l":0,"teams":{"AIS":{"w":2,"l":0}},"by_sport":{"BASKETBALL":{"w":2,"l":0}}},"AIS/GIFS":{"w":2,"l":0,"teams":{"AIS/GIFS":{"w":1,"l":0},"AIS/GIFS-2":{"w":1,"l":0}},"by_sport":{"BASKETBALL":{"w":2,"l":0}}},"DMHS":{"w":2,"l":0,"teams":{"DMHS":{"w":2,"l":0}},"by_sport":{"VOLLEYBALL":{"w":2,"l":0}}},"BIA":{"w":1,"l":0,"teams":{"BIA":{"w":1,"l":0}},"by_sport":{"BASKETBALL":{"w":1,"l":0}}},"BIS/AIS":{"w":1,"l":0,"teams":{"BIS/AIS":{"w":1,"l":0}},"by_sport":{"BASKETBALL":{"w":1,"l":0}}},"GPA":{"w":1,"l":0,"teams":{"GPA":{"w":1,"l":0}},"by_sport":{"VOLLEYBALL":{"w":1,"l":0}}},"SPPS":{"w":1,"l":0,"teams":{"SPPS":{"w":1,"l":0}},"by_sport":{"VOLLEYBALL":{"w":1,"l":0}}},"TES":{"w":0,"l":1,"teams":{"TES":{"w":0,"l":1}},"by_sport":{"VOLLEYBALL":{"w":0,"l":1}}}};
+
+function renderOpponents() {
+  // ISB Rival Spotlight
+  const isb = OPP_DATA['ISB'];
+  const isbPct = pct(isb.w, isb.l);
+  const sportBreak = Object.entries(isb.by_sport).map(([s,d])=>{
+    const p=pct(d.w,d.l);
+    return `<div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+      <span class="sport-dot ${sportClass(s)}"></span>
+      <span style="font-size:13px;min-width:80px">${sportLabel(s)}</span>
+      <span class="record-w">${d.w}W</span><span style="color:var(--text-dim)">–</span><span class="record-l">${d.l}L</span>
+      <span class="pct-badge ${pctClass(p)}" style="font-size:11px">${p}%</span>
+    </div>`;
+  }).join('');
+  const teamBreak = Object.entries(isb.teams).map(([t,d])=>{
+    return `<span style="font-size:12px;color:var(--text-dim);margin-right:14px">${t}: ${d.w}W-${d.l}L</span>`;
+  }).join('');
+
+  document.getElementById('rivalSpotlight').innerHTML = `
+    <div class="trajectory-card" style="border-left:3px solid var(--accent)">
+      <div class="trajectory-header">
+        <div>
+          <span class="trajectory-name" style="font-size:20px">ISB — International School of Busan</span>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'Instrument Serif',serif;font-size:32px">${isb.w}–${isb.l}</div>
+          <div style="font-size:14px;font-weight:700;color:${pctColor(isbPct)}">${isbPct}% win rate</div>
+          <div style="font-size:12px;color:var(--text-dim)">${isb.w+isb.l} all-time meetings</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:4px">By Sport</div>
+      ${sportBreak}
+      <div style="margin-top:16px;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:6px">By Team Level</div>
+      <div>${teamBreak}</div>
+    </div>`;
+
+  // All opponents
+  const oppArr = Object.entries(OPP_DATA).sort((a,b)=>(b[1].w+b[1].l)-(a[1].w+a[1].l));
+  document.getElementById('opponentList').innerHTML = oppArr.map(([name, d])=>{
+    const total = d.w+d.l;
+    const p = pct(d.w, d.l);
+    const hasBreakout = Object.keys(d.teams).length > 1 || Object.keys(d.by_sport).length > 1;
+
+    const sportBars = Object.entries(d.by_sport).map(([s,sd])=>{
+      return `<span style="font-size:12px;margin-right:12px"><span class="sport-dot ${sportClass(s)}"></span>${sportLabel(s)}: ${sd.w}W-${sd.l}L</span>`;
+    }).join('');
+
+    const teamRows = Object.keys(d.teams).length > 1 ? Object.entries(d.teams).map(([t,td])=>{
+      return `<span style="font-size:12px;color:var(--text-dim);margin-right:12px">${t}: ${td.w}W-${td.l}L</span>`;
+    }).join('') : '';
+
+    const uid = 'opp_'+name.replace(/[^a-zA-Z0-9]/g,'_');
+
+    return `
+      <div class="sport-record-card" style="margin-bottom:8px;${hasBreakout?'cursor:pointer':''}" onclick="document.getElementById('${uid}').style.display=document.getElementById('${uid}').style.display==='none'?'block':'none'">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <span style="font-weight:700;font-size:15px">${name}</span>
+            <span style="color:var(--text-dim);font-size:13px;margin-left:12px">${total} games</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-family:'Instrument Serif',serif;font-size:22px">${d.w}–${d.l}</span>
+            <span class="pct-badge ${pctClass(p)}">${p}%</span>
+          </div>
+        </div>
+        <div id="${uid}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="margin-bottom:6px">${sportBars}</div>
+          ${teamRows ? `<div style="margin-top:8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:4px">By Team Level</div><div>${teamRows}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ====== NAV ======
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('sec-'+btn.dataset.section).classList.add('active');
+  });
+});
+
+// ====== INIT ======
+renderHeader();
+renderOverview();
+renderTrajectory();
+renderPrograms();
+renderCompetition();
+renderDeepDive('BASKETBALL', 'ALL');
+renderOpponents();
+</script>
+</body>
+</html>
