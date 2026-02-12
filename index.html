@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dylan Barnes — Coaching Dashboard</title>
+<title>The Arc — Dylan Barnes | Coaching Career Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -57,6 +57,39 @@ body {
   width: 360px; height: 360px;
   background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
   pointer-events: none;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -180px; left: 50%;
+  transform: translateX(-50%);
+  width: 700px; height: 240px;
+  border-radius: 50%;
+  border: 2px solid rgba(37, 99, 235, 0.06);
+  pointer-events: none;
+}
+.arc-brand {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.arc-brand svg {
+  width: 20px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.arc-brand .arc-sub {
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-size: 10px;
 }
 .header-top {
   display: flex;
@@ -611,6 +644,12 @@ th.sortable:hover { color: var(--accent); }
 <div class="header">
   <div class="header-top">
     <div>
+      <div class="arc-brand">
+        <svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12 C6 2, 18 2, 22 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        THE ARC <span class="arc-sub">Coaching Career Dashboard</span>
+      </div>
       <div class="coach-name">Dylan Barnes</div>
       <div class="header-meta">
         <span>Coaching Record</span>
@@ -793,9 +832,19 @@ th.sortable:hover { color: var(--accent); }
 
 </div>
 
+<footer style="text-align:center;padding:32px 24px 40px;color:var(--text-dim);font-size:12px;border-top:1px solid var(--border);background:var(--surface)">
+  <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:6px">
+    <svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:10px;color:var(--accent)">
+      <path d="M2 12 C6 2, 18 2, 22 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span style="font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:10px;color:var(--accent)">THE ARC</span>
+  </div>
+  <div>Coaching Career Dashboard · Dylan Barnes</div>
+</footer>
+
 <script>
 /*
- * Dylan Barnes — Coaching Dashboard
+ * The Arc — Dylan Barnes | Coaching Career Dashboard
  * Single-file HTML dashboard. All data is embedded as JSON constants below.
  *
  * === HOW TO UPDATE ===
